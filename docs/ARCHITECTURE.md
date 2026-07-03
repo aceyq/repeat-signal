@@ -13,8 +13,8 @@ This site is read far more than it's written to, and its core value is a *narrat
 │   in notebooks/    │        │  + PostgreSQL/PostGIS│    │   client islands)     │
 │   scripts)          │        │                    │        │                       │
 └─────────────────┘        └──────────────────┘        └─────────────────────┘
-     runs offline               deployed on Railway         deployed on Vercel
-     (not user-facing)
+     runs offline            deployed on Render +          deployed on Vercel
+     (not user-facing)         Neon (Postgres)
 ```
 
 ### 1. Data pipeline (offline, not user-facing)
@@ -30,7 +30,8 @@ A real backend, but a *read-mostly* one:
 - **PostgreSQL** stores normalized incident-level and pre-aggregated tables. **PostGIS** extension handles geospatial queries (point-in-polygon joins for neighborhood boundaries, distance queries if needed).
 - **FastAPI** exposes a small number of well-designed endpoints: filter by city, date range, incident category, neighborhood; return time series and geo-aggregated data as JSON. Pydantic models give us typed request/response contracts — good practice, and a natural place to talk about data validation in interviews.
 - No user accounts, no writes from the public — this is a public-data read API, which keeps scope honest instead of bolting on auth/CRUD the project doesn't need.
-- Deployed on **Railway**, which also hosts the managed Postgres instance — keeps infra simple for a solo project while still being a "real" cloud deployment.
+- Deployed on **Render's free tier**, with **Neon** providing managed serverless Postgres (also free tier). Both are $0/month, which matters for a portfolio project that may sit idle between application cycles.
+- **Trade-off we're accepting:** Render's free tier spins the service down after ~15 minutes of no traffic. The first request after idle takes 30-50 seconds to wake back up. Rather than pay to avoid this (Railway's always-on Hobby plan is ~$5/month) or hide it, we design for it directly: the frontend shows an intentional "loading the data..." sequence during a cold start instead of a blank/broken-looking page (see Milestone 9 in `docs/ROADMAP.md`). This is a real, defensible engineering trade-off to be able to explain in interviews, not a workaround to be embarrassed about.
 
 ### 3. Frontend — Next.js + TypeScript
 

@@ -1,5 +1,5 @@
 # Local development database only.
-# Production database (Milestone 3+) will be a managed Railway Postgres instance.
+# Production database (Milestone 10) will be a managed Neon Postgres instance.
 services:
   db:
     image: postgis/postgis:16-3.4

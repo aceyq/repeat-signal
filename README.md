@@ -30,7 +30,7 @@ Chicago, New York City, and San Francisco — chosen for large, well-documented 
 | Backend | Python, FastAPI |
 | Database | PostgreSQL (+ PostGIS for geospatial queries) |
 | Data processing | Pandas, GeoPandas, Jupyter |
-| Deployment | Vercel (frontend), Railway (backend + database) |
+| Deployment | Vercel (frontend), Render (backend), Neon (database) |
 
 Full reasoning behind these choices is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

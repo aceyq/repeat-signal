@@ -30,7 +30,7 @@ Built one milestone at a time. Each milestone is only started after the previous
   Human-story sections built around cited, already-public case studies, tied back into the surrounding data.
 
 - [ ] **Milestone 9 — Polish pass**
-  Animation refinement, full responsive pass, accessibility audit (contrast, reduced-motion, keyboard nav), performance pass.
+  Animation refinement, full responsive pass, accessibility audit (contrast, reduced-motion, keyboard nav), performance pass, and a designed "waking up the data" loading sequence for the free-tier backend's cold start (see `docs/ARCHITECTURE.md`).
 
 - [ ] **Milestone 10 — Deployment & documentation**
-  Production deploy (Vercel + Railway), final README with screenshots/GIFs, walkthrough write-up for portfolio use.
+  Production deploy (Vercel for frontend, Render for backend, Neon for database — all free tier), final README with screenshots/GIFs, walkthrough write-up for portfolio use.
