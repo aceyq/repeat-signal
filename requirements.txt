@@ -1,0 +1,10 @@
+# Shared Python dependencies for data acquisition, exploration, and pipeline work
+# (notebooks/ and scripts/). Backend-specific dependencies (FastAPI, SQLAlchemy, etc.)
+# live in backend/requirements.txt, added in Milestone 3.
+
+pandas>=2.2,<3.0
+requests>=2.31,<3.0
+python-dotenv>=1.0,<2.0
+jupyter>=1.0,<2.0
+ipykernel>=6.29,<7.0
+pyarrow>=16.0,<18.0

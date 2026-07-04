@@ -5,8 +5,8 @@ Built one milestone at a time. Each milestone is only started after the previous
 - [x] **Milestone 0 — Architecture & repository setup**
   Vision alignment, tech stack decisions, dataset selection, repo skeleton, docs (this folder).
 
-- [ ] **Milestone 1 — Data acquisition & exploration**
-  Pull raw data samples from Chicago, NYC, and SF open data APIs; verify live schemas against `docs/DATA_SOURCES.md`; exploratory notebooks; write a data dictionary for each city's raw schema.
+- [x] **Milestone 1 — Data acquisition & exploration**
+  Pull raw data samples from Chicago, NYC, and SF open data APIs; verify live schemas against `docs/DATA_SOURCES.md`; exploratory notebooks; write a data dictionary for each city's raw schema. See `notebooks/01-03_*.ipynb` and `docs/DATA_DICTIONARY.md`. Key findings: Chicago has a native `domestic` flag, NYC has per-complaint demographic fields (governed by `docs/ETHICS.md`) with ~33-38% unusable/unknown race values, SF has the cleanest native neighborhood field. Cross-city "domestic-related" comparisons can't be measured identically across all three cities — a limitation to state explicitly in the site's narrative.
 
 - [ ] **Milestone 2 — Data pipeline & cross-city normalization**
   Clean and normalize all three cities into the shared schema from `docs/ARCHITECTURE.md`; geospatial join to neighborhood boundaries; build the pre-aggregated tables the API will serve; promote notebook logic into `scripts/`.

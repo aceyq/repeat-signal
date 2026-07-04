@@ -2,27 +2,28 @@
 
 All data used in this project is **public, open, government-published data**. No private, leaked, or scraped-from-individuals data is used anywhere in this project. Every dataset listed below is published by the city itself specifically for public access and research.
 
-> **Note:** Dataset identifiers below are recorded from public knowledge of these open data portals and will be verified against the live API during the Milestone 1 (data acquisition) work — portal IDs and schemas do occasionally change, and confirming them against the live endpoint is the first task of that milestone, not an assumption we build on blindly.
+> **Verified 2026-07-03:** all dataset IDs below were confirmed live against their real APIs during Milestone 1, and the actual field-level schema (not just the dataset description) is documented in [DATA_DICTIONARY.md](DATA_DICTIONARY.md), generated from real pulled samples in `notebooks/01–03_*.ipynb`.
 
 ## Chicago
 
 - **Portal:** Chicago Data Portal (data.cityofchicago.org), powered by Socrata.
-- **Primary dataset:** "Crimes - 2001 to Present" — incident-level reported crime data including date, primary type/description, block-level location (street address redacted to block level for privacy), community area, and ward.
+- **Primary dataset:** "Crimes - 2001 to Present" (`ijzp-q8t2`) — incident-level reported crime data including date, primary type/description, block-level location (street address redacted to block level for privacy), community area, and ward.
 - **Supporting data:** Community area boundaries (GeoJSON/Shapefile) for mapping, also published on the same portal.
-- **Why it's useful here:** Very large volume, long time range (2001–present), and consistently documented field definitions — best dataset for the "how do trends change over time" question.
+- **Why it's useful here:** Very large volume, long time range (2001–present), and consistently documented field definitions — best dataset for the "how do trends change over time" question. Also the only one of the three cities with a native `domestic` boolean flag (see `docs/DATA_DICTIONARY.md`).
 
 ## New York City
 
 - **Portal:** NYC Open Data (data.cityofnewyork.us).
-- **Primary datasets:** "NYPD Complaint Data Historic" (closed cases, multi-decade) and "NYPD Complaint Data Current (Year To Date)" — incident-level complaint data with offense classification, borough, precinct, and approximate location.
+- **Primary datasets:** "NYPD Complaint Data Historic" (`qgea-i56i`, closed cases, multi-decade) and "NYPD Complaint Data Current (Year To Date)" (`5uac-w243`) — incident-level complaint data with offense classification, borough, precinct, and approximate location.
 - **Supporting data:** NYPD precinct boundaries (GeoJSON), also published on the portal.
 - **Why it's useful here:** NYC has by far the richest supply of *already-public, already-reported* journalism and case studies to pair as narrative anchors — important for the human-story sections without needing to identify anyone ourselves.
+- **Important:** this dataset also includes per-complaint suspect/victim demographic fields (`susp_race`, `susp_sex`, `susp_age_group`, `vic_race`, `vic_sex`, `vic_age_group`). See `docs/ETHICS.md` for the explicit policy governing if/how these are used, and `docs/DATA_DICTIONARY.md` for how usable they actually are (roughly a third are unusable/unknown).
 
 ## San Francisco
 
 - **Portal:** DataSF (data.sfgov.org).
-- **Primary dataset:** "Police Department Incident Reports: 2018 to Present" — incident-level reports with category, resolution, neighborhood (SF publishes an official analysis-neighborhood boundary layer), and approximate location.
-- **Why it's useful here:** Smallest and cleanest of the three — useful as a sanity check for the normalization pipeline before scaling up to Chicago/NYC volume, and a good place to catch schema-mapping bugs early and cheap.
+- **Primary dataset:** "Police Department Incident Reports: 2018 to Present" (`wg3w-h783`) — incident-level reports with category, resolution, neighborhood (SF publishes an official analysis-neighborhood boundary layer), and approximate location.
+- **Why it's useful here:** Smallest and cleanest of the three — useful as a sanity check for the normalization pipeline before scaling up to Chicago/NYC volume, and a good place to catch schema-mapping bugs early and cheap. Also the only city with a directly named neighborhood field (no boundary-code join required).
 
 ## What this data can and cannot tell us
 

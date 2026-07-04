@@ -2,7 +2,7 @@
 
 *A working title — an interactive data-storytelling project exploring patterns in public police report and 911 call-for-service data across multiple U.S. cities.*
 
-> **Status:** 🚧 Early development — Milestone 0 (architecture & repo setup) complete.
+> **Status:** 🚧 Early development — Milestone 1 of 10 complete (architecture, repo setup, and live data exploration across all three cities).
 
 ## What this is
 
@@ -56,7 +56,19 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the full milestone breakdown. We're b
 
 ## Running this project locally
 
-Instructions will be added as each layer (data pipeline, backend, frontend) is built out. Nothing to run yet beyond the repo skeleton.
+### Data notebooks (Milestone 1+)
+
+```bash
+cd repeat-signal
+python3 -m venv .venv
+source .venv/bin/activate       # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+jupyter lab notebooks/          # opens Jupyter in your browser
+```
+
+Open any notebook in `notebooks/` and run all cells top to bottom — each one pulls a live sample directly from the relevant city's open data API, so an internet connection is required. No API keys/tokens are needed for this exploratory volume of requests.
+
+Backend and frontend instructions will be added as those layers are built out (Milestones 3 and 4).
 
 ## License
 
