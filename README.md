@@ -2,7 +2,7 @@
 
 *A working title — an interactive data-storytelling project exploring patterns in public police report and 911 call-for-service data across multiple U.S. cities.*
 
-> **Status:** 🚧 Early development — Milestone 1 of 10 complete (architecture, repo setup, and live data exploration across all three cities).
+> **Status:** 🚧 Early development — Milestone 2 of 10 complete (architecture, repo setup, live data exploration, and a working cross-city data pipeline covering 1.65M incidents across all three cities).
 
 ## What this is
 
@@ -67,6 +67,17 @@ jupyter lab notebooks/          # opens Jupyter in your browser
 ```
 
 Open any notebook in `notebooks/` and run all cells top to bottom — each one pulls a live sample directly from the relevant city's open data API, so an internet connection is required. No API keys/tokens are needed for this exploratory volume of requests.
+
+### Data pipeline (Milestone 2+)
+
+With the same virtual environment active:
+
+```bash
+cd scripts
+python3 run_pipeline.py
+```
+
+Pulls a real 2-year window from all three cities' live APIs, cleans and normalizes it into a shared schema, geospatially joins every incident to a named neighborhood, and produces the small monthly aggregate table the API will serve. Takes a few minutes (mostly the initial data fetch). See `docs/PIPELINE.md` for what each step does and why.
 
 Backend and frontend instructions will be added as those layers are built out (Milestones 3 and 4).
 

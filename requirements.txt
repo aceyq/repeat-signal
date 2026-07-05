@@ -8,3 +8,5 @@ python-dotenv>=1.0,<2.0
 jupyter>=1.0,<2.0
 ipykernel>=6.29,<7.0
 pyarrow>=16.0,<18.0
+geopandas>=0.14,<1.1
+shapely>=2.0,<3.0

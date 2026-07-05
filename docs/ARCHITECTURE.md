@@ -50,15 +50,15 @@ We considered skipping the live backend entirely and just shipping precomputed J
 
 Would be resume-buzzword-friendly but dishonest to the actual problem size. A monolith FastAPI service and a single Postgres database are the right scale for this project; reviewers who know what they're doing will respect right-sized architecture more than over-engineering.
 
-## Cross-city data model (high level)
+## Cross-city data model (as built in Milestone 2)
 
-Each city's raw schema is different (different column names, categories, geographies). The pipeline normalizes all three into one shared schema, roughly:
+Each city's raw schema is different (different column names, categories, geographies). The pipeline (`scripts/`, documented in `docs/PIPELINE.md`) normalizes all three into one shared schema:
 
-- `incidents` — one row per reported incident: `city`, `incident_id`, `occurred_at`, `reported_at`, `category` (normalized across cities), `raw_category` (original label, kept for transparency), `neighborhood_id`, `lat`, `lon`, `source_dataset`, `source_row_id`.
-- `neighborhoods` — one row per city neighborhood/precinct/community area boundary, with geometry (PostGIS), used both for maps and for aggregation.
-- Aggregate tables (materialized from `incidents`): monthly counts by city/category/neighborhood, used directly by the frontend's charts so the API rarely computes aggregates on the fly.
+- `incidents` — one row per reported incident: `city`, `incident_id`, `occurred_at`, `category` (normalized across cities into a shared 21-value taxonomy), `raw_category` (original label, kept for transparency), `neighborhood_id`, `neighborhood_name`, `latitude`, `longitude`, plus a small set of intentionally city-specific columns that aren't forced into a shared field because they don't mean the same thing across cities (`chicago_domestic_flag`, `chicago_arrest`, `sf_resolution`, `nyc_severity`, and NYC's suspect/victim demographic fields, governed by `docs/ETHICS.md`).
+- `neighborhoods` — one row per city neighborhood/precinct/community area boundary (380 total: 77 Chicago + 262 NYC + 41 SF), with geometry, used both for maps and for aggregation.
+- `monthly_aggregates` — monthly counts by city × category × neighborhood, materialized from `incidents`. This is what the API actually serves; at 98,759 rows / 264 KB for a 2-year window across all three cities, it comfortably fits any free-tier database regardless of how large the underlying incident-level data grows. The frontend's charts and maps read from this table, not the multi-million-row incident table.
 
-This schema will be refined once we're inside the actual data during the acquisition milestone — this is the working plan, not a final contract.
+The full incident-level table (1.65M rows, 38MB) and raw per-city pulls are gitignored — they're regenerable in a few minutes via `python scripts/run_pipeline.py` and, in NYC's case, contain individual-level demographic data that shouldn't sit in git history even though the source is public. Only the small `neighborhoods` and `monthly_aggregates` tables are committed, since those are what Milestone 3's database actually loads.
 
 ## Local development (once scaffolded)
 

@@ -30,7 +30,14 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*.csv
 data/processed/*.parquet
+data/processed/*.geojson
 !data/processed/.gitkeep
+# Small, reproducible seed tables ARE tracked -- these are what Milestone 3's
+# database actually loads, and they're tiny (a few hundred KB to a couple MB).
+# The large incident-level table and the redundant neighborhoods.geojson (both
+# regenerable via `python scripts/run_pipeline.py`) are intentionally excluded.
+!data/processed/monthly_aggregates.parquet
+!data/processed/neighborhoods.parquet
 
 # --- Databases ---
 *.sqlite3

@@ -8,8 +8,8 @@ Built one milestone at a time. Each milestone is only started after the previous
 - [x] **Milestone 1 — Data acquisition & exploration**
   Pull raw data samples from Chicago, NYC, and SF open data APIs; verify live schemas against `docs/DATA_SOURCES.md`; exploratory notebooks; write a data dictionary for each city's raw schema. See `notebooks/01-03_*.ipynb` and `docs/DATA_DICTIONARY.md`. Key findings: Chicago has a native `domestic` flag, NYC has per-complaint demographic fields (governed by `docs/ETHICS.md`) with ~33-38% unusable/unknown race values, SF has the cleanest native neighborhood field. Cross-city "domestic-related" comparisons can't be measured identically across all three cities — a limitation to state explicitly in the site's narrative.
 
-- [ ] **Milestone 2 — Data pipeline & cross-city normalization**
-  Clean and normalize all three cities into the shared schema from `docs/ARCHITECTURE.md`; geospatial join to neighborhood boundaries; build the pre-aggregated tables the API will serve; promote notebook logic into `scripts/`.
+- [x] **Milestone 2 — Data pipeline & cross-city normalization**
+  Full pipeline built in `scripts/` (fetch -> clean/normalize -> geospatial join -> aggregate), documented in `docs/PIPELINE.md`. Pulled a real 2-year window: 1,652,117 incidents across all three cities, geo-joined to 380 neighborhoods (100% match for Chicago/NYC, 95.3% for SF), normalized into a shared 21-category taxonomy, and reduced to a 98,759-row / 264KB monthly aggregate table that Milestone 3's database will actually serve.
 
 - [ ] **Milestone 3 — Database & backend API**
   PostgreSQL/PostGIS schema, seed script from processed data, FastAPI app with typed endpoints (filter by city/date range/category/neighborhood), basic tests, local Docker Compose setup.
