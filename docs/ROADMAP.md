@@ -14,8 +14,8 @@ Built one milestone at a time. Each milestone is only started after the previous
 - [x] **Milestone 3 — Database & backend API**
   PostgreSQL schema (Alembic migrations), seed script loading the pipeline's processed parquet files, FastAPI app with typed endpoints (`/api/cities`, `/api/categories`, `/api/neighborhoods`, `/api/aggregates`, `/api/summary`), 13 passing tests. Revised mid-build from the original PostGIS plan to plain Postgres with a JSON geometry column, since PostGIS required an hours-long from-source GDAL/protobuf/LLVM build on this machine's unsupported OS version and would only have bought a live spatial-query engine the project never actually uses (all spatial computation already happens offline in Milestone 2). See `docs/ARCHITECTURE.md` and `backend/README.md`.
 
-- [ ] **Milestone 4 — Frontend scaffold & design system**
-  Next.js app initialized, Tailwind design tokens (typography, color palette, dark mode), base layout/navigation shell, deployed skeleton on Vercel talking to local/dev API.
+- [x] **Milestone 4 — Frontend scaffold & design system**
+  Next.js 16 (App Router, TypeScript, Tailwind v4) initialized in `frontend/`. Dark-first design system (Fraunces + Inter fonts, per-city accent colors, class-based dark mode toggle via `next-themes`), header/footer layout shell, and a typed API client (`lib/api.ts`) verified end-to-end against the live backend — the placeholder homepage renders real numbers (1,652,117 total incidents) fetched server-side from Postgres through FastAPI. Production build, lint, and a Playwright screenshot check (dark + light mode, no console errors) all pass. Public Vercel deployment deferred to Milestone 10, once there's an actual homepage worth showing.
 
 - [ ] **Milestone 5 — Homepage hero & scrollytelling intro**
   The first-impression landing sequence — this is the "documentary opening" and the highest-leverage design work in the project.

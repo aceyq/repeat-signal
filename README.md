@@ -2,7 +2,7 @@
 
 *A working title — an interactive data-storytelling project exploring patterns in public police report and 911 call-for-service data across multiple U.S. cities.*
 
-> **Status:** 🚧 Early development — Milestone 3 of 10 complete (architecture, repo setup, live data exploration, a working cross-city data pipeline, and a tested FastAPI + PostgreSQL backend serving it all).
+> **Status:** 🚧 Early development — Milestone 4 of 10 complete: architecture, repo setup, live data exploration, a working cross-city data pipeline, a tested FastAPI + PostgreSQL backend, and a Next.js frontend scaffold with a dark-first design system, verified end-to-end against real data.
 
 ## What this is
 
@@ -83,7 +83,9 @@ Pulls a real 2-year window from all three cities' live APIs, cleans and normaliz
 
 See [backend/README.md](backend/README.md) for full setup (separate virtual environment, Postgres setup, migrations, seeding, running the API, and tests).
 
-Frontend instructions will be added once that layer is built out (Milestone 4).
+### Frontend (Milestone 4+)
+
+See [frontend/README.md](frontend/README.md) for full setup (Next.js dev server, design system notes, environment variables). Requires the backend running.
 
 ## License
 

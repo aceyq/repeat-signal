@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/*
+  Design tokens for Repeat Signal.
+
+  Dark-first, editorial palette -- the site defaults to dark mode (the
+  "documentary" reading experience the project is going for) but fully
+  supports a light theme toggle for accessibility/preference (see
+  components/theme-toggle.tsx). Class-based dark mode (rather than
+  prefers-color-scheme only) so next-themes can toggle it explicitly.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f7f5f0;
+  --foreground: #17181c;
+  --muted: #6b6d76;
+  --border: #ddd9d0;
+  --surface: #ffffff;
+
+  /* Per-city accent hues -- also used to color-code cities consistently
+     across every chart/map in later milestones. */
+  --accent-chicago: #c17a2b;
+  --accent-nyc: #2b7ac1;
+  --accent-sf: #8a4fc1;
+
+  --accent: #c17a2b;
+}
+
+.dark {
+  --background: #0b0c0f;
+  --foreground: #ede9e2;
+  --muted: #9a9ba3;
+  --border: #26282f;
+  --surface: #131418;
+
+  --accent-chicago: #e0a35c;
+  --accent-nyc: #5ca3e0;
+  --accent-sf: #b083e0;
+
+  --accent: #e0a35c;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-chicago: var(--accent-chicago);
+  --color-accent-nyc: var(--accent-nyc);
+  --color-accent-sf: var(--accent-sf);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
