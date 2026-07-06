@@ -11,8 +11,8 @@ Built one milestone at a time. Each milestone is only started after the previous
 - [x] **Milestone 2 — Data pipeline & cross-city normalization**
   Full pipeline built in `scripts/` (fetch -> clean/normalize -> geospatial join -> aggregate), documented in `docs/PIPELINE.md`. Pulled a real 2-year window: 1,652,117 incidents across all three cities, geo-joined to 380 neighborhoods (100% match for Chicago/NYC, 95.3% for SF), normalized into a shared 21-category taxonomy, and reduced to a 98,759-row / 264KB monthly aggregate table that Milestone 3's database will actually serve.
 
-- [ ] **Milestone 3 — Database & backend API**
-  PostgreSQL/PostGIS schema, seed script from processed data, FastAPI app with typed endpoints (filter by city/date range/category/neighborhood), basic tests, local Docker Compose setup.
+- [x] **Milestone 3 — Database & backend API**
+  PostgreSQL schema (Alembic migrations), seed script loading the pipeline's processed parquet files, FastAPI app with typed endpoints (`/api/cities`, `/api/categories`, `/api/neighborhoods`, `/api/aggregates`, `/api/summary`), 13 passing tests. Revised mid-build from the original PostGIS plan to plain Postgres with a JSON geometry column, since PostGIS required an hours-long from-source GDAL/protobuf/LLVM build on this machine's unsupported OS version and would only have bought a live spatial-query engine the project never actually uses (all spatial computation already happens offline in Milestone 2). See `docs/ARCHITECTURE.md` and `backend/README.md`.
 
 - [ ] **Milestone 4 — Frontend scaffold & design system**
   Next.js app initialized, Tailwind design tokens (typography, color palette, dark mode), base layout/navigation shell, deployed skeleton on Vercel talking to local/dev API.

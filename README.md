@@ -2,7 +2,7 @@
 
 *A working title — an interactive data-storytelling project exploring patterns in public police report and 911 call-for-service data across multiple U.S. cities.*
 
-> **Status:** 🚧 Early development — Milestone 2 of 10 complete (architecture, repo setup, live data exploration, and a working cross-city data pipeline covering 1.65M incidents across all three cities).
+> **Status:** 🚧 Early development — Milestone 3 of 10 complete (architecture, repo setup, live data exploration, a working cross-city data pipeline, and a tested FastAPI + PostgreSQL backend serving it all).
 
 ## What this is
 
@@ -28,7 +28,7 @@ Chicago, New York City, and San Francisco — chosen for large, well-documented 
 |---|---|
 | Frontend | Next.js (App Router), TypeScript, Tailwind CSS, Framer Motion, D3.js, MapLibre GL JS |
 | Backend | Python, FastAPI |
-| Database | PostgreSQL (+ PostGIS for geospatial queries) |
+| Database | PostgreSQL |
 | Data processing | Pandas, GeoPandas, Jupyter |
 | Deployment | Vercel (frontend), Render (backend), Neon (database) |
 
@@ -47,7 +47,7 @@ repeat-signal/
 ├── notebooks/         # Exploratory analysis & pipeline development
 ├── scripts/            # Standalone data pipeline scripts (production version of notebook logic)
 ├── docs/               # Architecture, data sources, ethics, roadmap
-└── docker-compose.yml  # Local Postgres/PostGIS for development
+└── docker-compose.yml  # Local Postgres for development
 ```
 
 ## Project roadmap
@@ -79,7 +79,11 @@ python3 run_pipeline.py
 
 Pulls a real 2-year window from all three cities' live APIs, cleans and normalizes it into a shared schema, geospatially joins every incident to a named neighborhood, and produces the small monthly aggregate table the API will serve. Takes a few minutes (mostly the initial data fetch). See `docs/PIPELINE.md` for what each step does and why.
 
-Backend and frontend instructions will be added as those layers are built out (Milestones 3 and 4).
+### Backend API (Milestone 3+)
+
+See [backend/README.md](backend/README.md) for full setup (separate virtual environment, Postgres setup, migrations, seeding, running the API, and tests).
+
+Frontend instructions will be added once that layer is built out (Milestone 4).
 
 ## License
 

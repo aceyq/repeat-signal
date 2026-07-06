@@ -1,8 +1,11 @@
 # Local development database only.
 # Production database (Milestone 10) will be a managed Neon Postgres instance.
+# Plain postgres, not PostGIS -- see docs/ARCHITECTURE.md for why (all spatial
+# computation happens offline in the data pipeline; the DB just serves precomputed
+# GeoJSON, no live geospatial query engine needed).
 services:
   db:
-    image: postgis/postgis:16-3.4
+    image: postgres:16
     container_name: repeat-signal-db
     restart: unless-stopped
     environment:

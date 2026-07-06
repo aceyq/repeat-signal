@@ -10,7 +10,7 @@ This site is read far more than it's written to, and its core value is a *narrat
 ┌─────────────────┐        ┌──────────────────┐        ┌─────────────────────┐
 │  Data pipeline   │        │   FastAPI backend │        │   Next.js frontend   │
 │  (Pandas/GeoPandas│  -->  │  (read-mostly API) │  -->  │  (App Router, SSR/   │
-│   in notebooks/    │        │  + PostgreSQL/PostGIS│    │   client islands)     │
+│   in notebooks/    │        │  + PostgreSQL       │    │   client islands)     │
 │   scripts)          │        │                    │        │                       │
 └─────────────────┘        └──────────────────┘        └─────────────────────┘
      runs offline            deployed on Render +          deployed on Vercel
@@ -23,12 +23,13 @@ Raw data is pulled from each city's open data portal, cleaned, normalized into a
 
 We precompute aggressively. The frontend should rarely need the backend to do expensive computation live — most heavy lifting happens once, offline, and gets stored as query-ready rows.
 
-### 2. Backend — FastAPI + PostgreSQL/PostGIS
+### 2. Backend — FastAPI + PostgreSQL
 
 A real backend, but a *read-mostly* one:
 
-- **PostgreSQL** stores normalized incident-level and pre-aggregated tables. **PostGIS** extension handles geospatial queries (point-in-polygon joins for neighborhood boundaries, distance queries if needed).
+- **PostgreSQL** stores the two small tables the pipeline produces: `neighborhoods` and `monthly_aggregates` (see `docs/PIPELINE.md`). **No PostGIS** — all spatial computation (the point-in-polygon join assigning incidents to neighborhoods) already happened offline in the Milestone 2 pipeline via GeoPandas; the database only needs to store and return precomputed neighborhood boundaries as GeoJSON (a plain `JSON` column), never compute anything spatial itself. This was a deliberate Milestone 3 revision from the original plan — PostGIS pulls in a GDAL/protobuf/LLVM build chain that turned out to compile from source (multi-hour, failure-prone) on an unsupported OS/Homebrew configuration, and going through with it would have bought us a live spatial-query engine we don't actually use anywhere. Right-sizing the database to what the system actually needs, discovered mid-build, beats forcing through a heavier dependency because it was the original plan.
 - **FastAPI** exposes a small number of well-designed endpoints: filter by city, date range, incident category, neighborhood; return time series and geo-aggregated data as JSON. Pydantic models give us typed request/response contracts — good practice, and a natural place to talk about data validation in interviews.
+- **Alembic** manages schema migrations, SQLAlchemy 2.0 (via the `psycopg` v3 driver) is the ORM/query layer.
 - No user accounts, no writes from the public — this is a public-data read API, which keeps scope honest instead of bolting on auth/CRUD the project doesn't need.
 - Deployed on **Render's free tier**, with **Neon** providing managed serverless Postgres (also free tier). Both are $0/month, which matters for a portfolio project that may sit idle between application cycles.
 - **Trade-off we're accepting:** Render's free tier spins the service down after ~15 minutes of no traffic. The first request after idle takes 30-50 seconds to wake back up. Rather than pay to avoid this (Railway's always-on Hobby plan is ~$5/month) or hide it, we design for it directly: the frontend shows an intentional "loading the data..." sequence during a cold start instead of a blank/broken-looking page (see Milestone 9 in `docs/ROADMAP.md`). This is a real, defensible engineering trade-off to be able to explain in interviews, not a workaround to be embarrassed about.
@@ -62,5 +63,5 @@ The full incident-level table (1.65M rows, 38MB) and raw per-city pulls are giti
 
 ## Local development (once scaffolded)
 
-- `docker-compose.yml` at the repo root will spin up a local PostgreSQL + PostGIS instance so the backend can be developed without touching the production database.
+- `docker-compose.yml` at the repo root spins up a local PostgreSQL instance so the backend can be developed without touching the production database (only usable on Docker-capable machines; see `backend/README.md` for the native-Postgres alternative used during this project's own development).
 - Frontend and backend are developed and run independently (`npm run dev` / `uvicorn ...`), talking to each other over HTTP on localhost during development.
