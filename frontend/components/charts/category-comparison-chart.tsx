@@ -11,6 +11,43 @@ import type { CategoryTrend, CityStats } from "@/lib/types";
 const MARGIN = { top: 8, right: 48, bottom: 8, left: 168 };
 const ROW_HEIGHT = 64;
 const TOP_N_CATEGORIES = 8;
+const LABEL_PADDING = 12; // gap between wrapped label text and the axis line at x=0
+
+/** Wraps a right-aligned <text> label onto as many lines as needed to fit `maxWidth`,
+ * then re-centers the whole block vertically -- rather than letting long labels (e.g.
+ * "Criminal damage vandalism") overflow past the SVG's left edge and get clipped. */
+function wrapLabel(selection: d3.Selection<SVGTextElement, string, SVGGElement, unknown>, maxWidth: number) {
+  selection.each(function () {
+    const node = d3.select(this);
+    const words = (node.text() || "").split(/\s+/).reverse();
+    const x = node.attr("x");
+    node.text(null);
+
+    let word: string | undefined;
+    let line: string[] = [];
+    const lines: string[] = [];
+    let tspan = node.append("tspan").attr("x", x);
+    while ((word = words.pop())) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if ((tspan.node() as SVGTSpanElement).getComputedTextLength() > maxWidth && line.length > 1) {
+        line.pop();
+        tspan.text(line.join(" "));
+        lines.push(line.join(" "));
+        line = [word];
+        tspan = node.append("tspan").attr("x", x).text(word);
+      }
+    }
+    lines.push(line.join(" "));
+
+    // SVG tspan `dy` is relative to the *previous* tspan's baseline, not the parent --
+    // so only the first line needs the full centering offset; every following line
+    // just needs one more line-height step down from where the previous one landed.
+    const lineHeightEm = 1.1;
+    const startDy = -((lines.length - 1) * lineHeightEm) / 2 + 0.32; // 0.32em matches the row's single-line vertical-center baseline
+    node.selectAll("tspan").attr("dy", (_, i) => ((i as number) === 0 ? `${startDy}em` : `${lineHeightEm}em`));
+  });
+}
 
 export function CategoryComparisonChart({
   categoryTrends,
@@ -72,18 +109,20 @@ export function CategoryComparisonChart({
 
     const g = svg.append("g").attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
-    // Category row labels
-    g.append("g")
-      .selectAll("text")
+    // Category row labels -- wrapped onto multiple lines rather than clipped when a
+    // label (e.g. "Criminal damage vandalism") is too long to fit on one line.
+    const categoryLabels = g
+      .append("g")
+      .selectAll<SVGTextElement, string>("text")
       .data(topCategories)
       .join("text")
-      .attr("x", -12)
+      .attr("x", -LABEL_PADDING)
       .attr("y", (d) => (yCategory(d) ?? 0) + yCategory.bandwidth() / 2)
-      .attr("dy", "0.32em")
       .attr("text-anchor", "end")
       .attr("fill", foregroundColor)
       .attr("font-size", 13)
       .text((d) => formatCategoryLabel(d));
+    wrapLabel(categoryLabels, MARGIN.left - LABEL_PADDING * 2);
 
     // Baseline
     g.append("line")
