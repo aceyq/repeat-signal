@@ -4,10 +4,15 @@ import { PremiseSection } from "@/components/sections/premise-section";
 import { StatsSection } from "@/components/sections/stats-section";
 import { LimitsSection } from "@/components/sections/limits-section";
 import { MapSection } from "@/components/sections/map-section";
+import { TrendsSection } from "@/components/sections/trends-section";
 import { ContinueSection } from "@/components/sections/continue-section";
 
 export default async function Home() {
-  const summary = await api.getSummary();
+  const [summary, monthlyTrends, categoryTrends] = await Promise.all([
+    api.getSummary(),
+    api.getMonthlyTrends(),
+    api.getCategoryTrends(),
+  ]);
 
   return (
     <>
@@ -16,6 +21,11 @@ export default async function Home() {
       <StatsSection summary={summary} />
       <LimitsSection />
       <MapSection />
+      <TrendsSection
+        monthlyTrends={monthlyTrends}
+        categoryTrends={categoryTrends}
+        cityTotals={summary.cities}
+      />
       <ContinueSection />
     </>
   );

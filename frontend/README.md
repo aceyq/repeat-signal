@@ -64,6 +64,14 @@ Bugs 1 and 2 were caught by actually looking at Playwright screenshots rather th
 
 Neighborhood GeoJSON is fetched per city on demand (`GET /api/neighborhoods/geojson?city=`) and cached in a ref, not fetched all at once — see `backend/README.md` for why (payload size).
 
+## Chart implementation notes (Milestone 7)
+
+`components/charts/monthly-trend-chart.tsx` and `category-comparison-chart.tsx` use the classic "D3 controls the SVG imperatively" pattern: a `useEffect` keyed on data/width does a full `svg.selectAll("*").remove()` then redraws from scratch with real D3 (`d3.scaleTime`/`scaleLinear`/`scaleBand`, `d3.line`, `d3.axisBottom`/`axisLeft`, `d3.bisector` for the line chart's hover). Chart width is responsive via a small `useChartWidth` hook (`hooks/use-chart-width.ts`, `ResizeObserver`-based) rather than a fixed size. Colors are resolved from our CSS custom properties at render time (`lib/color-utils.ts`'s `resolveCssColor`) so the charts automatically follow the current theme and each city's consistent accent color.
+
+The category chart shows each category as a **share of that city's own total incidents**, not raw counts — New York's volume alone would otherwise make Chicago and San Francisco's bars invisible by comparison. The share calculation happens in the component (`incident_count / cityTotal`), not the API, so the math stays visible to whoever reads the code next.
+
+**A real data-integrity bug came up building the time-series chart:** San Francisco's most recent month sat at ~430 incidents against a normal month of ~7,500-8,000 — not a real one-month 96% drop in incidents, just the pipeline having been pulled a few days into that month, before it had a chance to be complete. Displayed as-is, it would have shown a misleading cliff at the end of the line. Fixed at the API level (`backend/app/routers/trends.py`'s `get_monthly_trends`, excludes any `year_month >= date.today().replace(day=1)`) rather than in the chart, since any consumer of that endpoint should get the same honest behavior — a monthly time series should only ever plot fully-elapsed months.
+
 ## A note on Next.js 16
 
 This project uses Next.js 16, which shipped after this assistant's training cutoff with real breaking changes (Turbopack on by default, fully-async `params`/`searchParams`, opt-in Cache Components/PPR). Before writing App Router code here, check `node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md` (bundled with the installed package) rather than assuming older Next.js conventions still apply.

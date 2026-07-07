@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 import { Reveal } from "@/components/ui/reveal";
 import { CITY_ORDER, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from "@/lib/map-config";
-import { rgba } from "@/lib/color-utils";
+import { resolveCssColor, rgba } from "@/lib/color-utils";
 import { computeBBox } from "@/lib/geo-utils";
 import type { City } from "@/lib/types";
 
@@ -19,10 +19,6 @@ async function fetchCityGeoJson(city: City): Promise<GeoJSON.FeatureCollection> 
   const response = await fetch(`${base}/api/neighborhoods/geojson?city=${city}`);
   if (!response.ok) throw new Error(`Failed to load ${city} neighborhoods: ${response.status}`);
   return response.json();
-}
-
-function resolveCssColor(varName: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
 }
 
 function renderCity(

@@ -1,8 +1,10 @@
 import type {
   AggregateRow,
   CategoryStats,
+  CategoryTrend,
   City,
   CityStats,
+  MonthlyTrend,
   NeighborhoodDetail,
   NeighborhoodSummary,
   Summary,
@@ -51,4 +53,7 @@ export const api = {
     limit?: number;
     offset?: number;
   }) => apiFetch<AggregateRow[]>("/api/aggregates", filters),
+  getMonthlyTrends: (filters?: { city?: City; category?: string }) =>
+    apiFetch<MonthlyTrend[]>("/api/trends/monthly", filters),
+  getCategoryTrends: (city?: City) => apiFetch<CategoryTrend[]>("/api/trends/categories", { city }),
 };

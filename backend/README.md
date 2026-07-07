@@ -73,6 +73,8 @@ pytest
 | `GET /api/neighborhoods/geojson?city=&category=` | Neighborhood boundaries + incident totals as one GeoJSON `FeatureCollection`, geometry simplified for web delivery -- powers the Milestone 6 map. Fetched per city on demand, not all 380 neighborhoods at once. |
 | `GET /api/aggregates?city=&category=&neighborhood_id=&start_date=&end_date=` | Filtered monthly incident counts -- the main data endpoint |
 | `GET /api/summary` | Overall totals across all three cities |
+| `GET /api/trends/monthly?city=&category=` | Total incidents per city per month, summed across neighborhoods -- powers the Milestone 7 time-series chart. Excludes the current (necessarily incomplete) calendar month. |
+| `GET /api/trends/categories?city=` | Total incidents per city per category, summed across neighborhoods and months -- powers the Milestone 7 category comparison chart. |
 
 ## Schema migrations
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import aggregates, categories, cities, neighborhoods
+from app.routers import aggregates, categories, cities, neighborhoods, trends
 
 app = FastAPI(
     title="Repeat Signal API",
@@ -26,6 +26,7 @@ app.include_router(cities.router)
 app.include_router(categories.router)
 app.include_router(neighborhoods.router)
 app.include_router(aggregates.router)
+app.include_router(trends.router)
 
 
 @app.get("/api/health", tags=["health"])

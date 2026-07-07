@@ -47,3 +47,15 @@ export interface Summary {
   date_range_end: string;
   cities: CityStats[];
 }
+
+export interface MonthlyTrend {
+  city: City;
+  year_month: string; // ISO date, first of month
+  incident_count: number;
+}
+
+export interface CategoryTrend {
+  city: City;
+  category: string;
+  incident_count: number;
+}

@@ -74,3 +74,19 @@ class NeighborhoodFeatureCollection(BaseModel):
 
     type: str = "FeatureCollection"
     features: list[NeighborhoodFeature]
+
+
+class MonthlyTrendOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    city: str
+    year_month: date
+    incident_count: int
+
+
+class CategoryTrendOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    city: str
+    category: str
+    incident_count: int
