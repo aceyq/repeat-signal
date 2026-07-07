@@ -18,13 +18,17 @@
   --border: #ddd9d0;
   --surface: #ffffff;
 
-  /* Per-city accent hues -- also used to color-code cities consistently
-     across every chart/map in later milestones. */
-  --accent-chicago: #c17a2b;
-  --accent-nyc: #2b7ac1;
+  /* Per-city accent hues -- used as text (city labels, links) as well as graphical
+     fills (map choropleth, chart bars/lines), so these need to clear WCAG AA's 4.5:1
+     text-contrast threshold, not just the 3:1 non-text threshold -- verified via
+     /tmp/contrast_check.mjs during the Milestone 9 accessibility audit. The original
+     --accent-chicago (#c17a2b, 3.45:1 on white) and --accent-nyc (#2b7ac1, 4.51:1,
+     right at the edge) were darkened; --accent-sf already passed at 4.86:1+. */
+  --accent-chicago: #9c611c;
+  --accent-nyc: #1c6091;
   --accent-sf: #8a4fc1;
 
-  --accent: #c17a2b;
+  --accent: #9c611c;
 }
 
 .dark {

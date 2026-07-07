@@ -1,7 +1,7 @@
 import { Reveal } from "@/components/ui/reveal";
-import { MonthlyTrendChart } from "@/components/charts/monthly-trend-chart";
-import { CategoryComparisonChart } from "@/components/charts/category-comparison-chart";
 import { CityLegend } from "@/components/charts/city-legend";
+import MonthlyTrendChart from "@/components/charts/monthly-trend-chart-lazy";
+import CategoryComparisonChart from "@/components/charts/category-comparison-chart-lazy";
 import type { CategoryTrend, CityStats, MonthlyTrend } from "@/lib/types";
 
 export function TrendsSection({

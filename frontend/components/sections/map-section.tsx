@@ -83,7 +83,8 @@ function renderCity(
   if (!skipFlyTo) {
     const bbox = computeBBox(geojson);
     if (bbox) {
-      map.fitBounds(bbox, { padding: 48, duration: 900, essential: true });
+      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      map.fitBounds(bbox, { padding: 48, duration: prefersReducedMotion ? 0 : 900, essential: true });
     }
   }
 }

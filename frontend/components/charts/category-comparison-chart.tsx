@@ -8,10 +8,18 @@ import { resolveCssColor } from "@/lib/color-utils";
 import { formatCategoryLabel } from "@/lib/format";
 import type { CategoryTrend, CityStats } from "@/lib/types";
 
-const MARGIN = { top: 8, right: 48, bottom: 8, left: 168 };
 const ROW_HEIGHT = 64;
 const TOP_N_CATEGORIES = 8;
 const LABEL_PADDING = 12; // gap between wrapped label text and the axis line at x=0
+const NARROW_BREAKPOINT = 480; // below this, the fixed desktop margin eats too much of the width
+
+/** A fixed 168px left margin is fine at desktop widths but eats nearly half of a
+ * ~390px mobile screen -- scale it (and the label font size) down on narrow
+ * containers instead, relying on wrapLabel to still fit the text. */
+function getMargin(width: number) {
+  const isNarrow = width < NARROW_BREAKPOINT;
+  return { top: 8, right: isNarrow ? 40 : 48, bottom: 8, left: isNarrow ? 108 : 168 };
+}
 
 /** Wraps a right-aligned <text> label onto as many lines as needed to fit `maxWidth`,
  * then re-centers the whole block vertically -- rather than letting long labels (e.g.
@@ -83,6 +91,8 @@ export function CategoryComparisonChart({
       (r) => r.category,
     );
 
+    const isNarrow = width < NARROW_BREAKPOINT;
+    const MARGIN = getMargin(width);
     const height = topCategories.length * ROW_HEIGHT;
     const innerWidth = width - MARGIN.left - MARGIN.right;
     const innerHeight = height - MARGIN.top - MARGIN.bottom;
@@ -120,7 +130,7 @@ export function CategoryComparisonChart({
       .attr("y", (d) => (yCategory(d) ?? 0) + yCategory.bandwidth() / 2)
       .attr("text-anchor", "end")
       .attr("fill", foregroundColor)
-      .attr("font-size", 13)
+      .attr("font-size", isNarrow ? 11 : 13)
       .text((d) => formatCategoryLabel(d));
     wrapLabel(categoryLabels, MARGIN.left - LABEL_PADDING * 2);
 
@@ -157,7 +167,7 @@ export function CategoryComparisonChart({
         .attr("y", (d) => (yCity(d.city) ?? 0) + yCity.bandwidth() / 2)
         .attr("dy", "0.32em")
         .attr("x", (d) => xShare(d.share) + 6)
-        .attr("font-size", 11)
+        .attr("font-size", isNarrow ? 10 : 11)
         .attr("fill", mutedColor)
         .text((d) => `${d.share.toFixed(1)}%`);
     }

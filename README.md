@@ -2,7 +2,7 @@
 
 *A working title — an interactive data-storytelling project exploring patterns in public police report and 911 call-for-service data across multiple U.S. cities.*
 
-> **Status:** 🚧 Early development — Milestone 8 of 10 complete. The full narrative arc of the homepage is now built: hero, premise, live data stats, stated limits, an interactive map, D3 trend/comparison charts, and three cited case studies — all driven by live data end to end. Remaining: a polish pass and public deployment.
+> **Status:** 🚧 Early development — Milestone 9 of 10 complete. The full narrative arc of the homepage is built and polished: hero, premise, live data stats, stated limits, an interactive map, D3 trend/comparison charts, and three cited case studies — accessibility-audited (contrast, reduced-motion, keyboard nav), responsive-checked, and performance-tuned, with a designed loading state for the eventual free-tier cold start. Remaining: public deployment.
 
 ## What this is
 

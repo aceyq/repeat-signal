@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useReducedMotion } from "framer-motion";
 
 /**
  * Ambient background: a deterministic scatter of small dots ("signals"), tinted
@@ -22,6 +23,7 @@ function mulberry32(seed: number) {
 const ACCENTS = ["var(--accent-chicago)", "var(--accent-nyc)", "var(--accent-sf)"];
 
 export function SignalField({ count = 60, seed = 42 }: { count?: number; seed?: number }) {
+  const prefersReducedMotion = useReducedMotion();
   const dots = useMemo(() => {
     const rand = mulberry32(seed);
     return Array.from({ length: count }, (_, i) => ({
@@ -50,13 +52,15 @@ export function SignalField({ count = 60, seed = 42 }: { count?: number; seed?: 
             fill={dot.color}
             opacity={0.45}
           >
-            <animate
-              attributeName="opacity"
-              values="0.15;0.55;0.15"
-              dur={`${dot.duration}s`}
-              begin={`${dot.delay}s`}
-              repeatCount="indefinite"
-            />
+            {!prefersReducedMotion && (
+              <animate
+                attributeName="opacity"
+                values="0.15;0.55;0.15"
+                dur={`${dot.duration}s`}
+                begin={`${dot.delay}s`}
+                repeatCount="indefinite"
+              />
+            )}
           </circle>
         ))}
       </svg>
