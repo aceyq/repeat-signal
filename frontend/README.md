@@ -28,18 +28,24 @@ Visit `http://localhost:3000`.
 frontend/
 ├── app/
 │   ├── layout.tsx       # fonts, ThemeProvider, header/footer shell
-│   ├── page.tsx          # homepage: hero + scrollytelling intro (Milestone 5)
+│   ├── page.tsx          # homepage: the full narrative arc (Milestones 5-8)
 │   └── globals.css       # design tokens (Tailwind v4 @theme)
 ├── components/
 │   ├── site-header.tsx, site-footer.tsx, theme-provider.tsx, theme-toggle.tsx
-│   ├── sections/          # homepage narrative beats (hero, premise, stats, limits, map, continue)
-│   └── ui/                # reusable primitives (reveal-on-scroll, animated count-up, ambient background)
+│   ├── sections/          # homepage narrative beats (hero, premise, stats, limits, map, trends, case studies, closing)
+│   ├── charts/             # D3 charts + shared city-color legend
+│   ├── cards/               # case-study-card.tsx
+│   └── ui/                 # reusable primitives (reveal-on-scroll, animated count-up, ambient background)
+├── hooks/
+│   └── use-chart-width.ts  # ResizeObserver-based responsive sizing for D3 charts
 └── lib/
-    ├── api.ts            # typed fetch client for the backend
-    ├── types.ts          # mirrors backend/app/schemas.py
-    ├── map-config.ts     # basemap style URLs, per-city accent metadata
-    ├── color-utils.ts    # hex -> rgba for MapLibre paint expressions
-    └── geo-utils.ts      # GeoJSON bounding-box helper (avoids a full turf.js dependency)
+    ├── api.ts             # typed fetch client for the backend
+    ├── types.ts           # mirrors backend/app/schemas.py
+    ├── map-config.ts      # basemap style URLs, per-city accent metadata
+    ├── color-utils.ts     # hex -> rgba and CSS-variable resolution (map + charts)
+    ├── geo-utils.ts       # GeoJSON bounding-box helper (avoids a full turf.js dependency)
+    ├── format.ts          # category label formatting for chart axes
+    └── case-studies.ts    # the 3 case studies (Milestone 8) -- see docs/CASE_STUDIES.md for sourcing
 ```
 
 ## Scrollytelling implementation notes (Milestone 5)

@@ -5,6 +5,7 @@ import { StatsSection } from "@/components/sections/stats-section";
 import { LimitsSection } from "@/components/sections/limits-section";
 import { MapSection } from "@/components/sections/map-section";
 import { TrendsSection } from "@/components/sections/trends-section";
+import { CaseStudiesSection } from "@/components/sections/case-studies-section";
 import { ContinueSection } from "@/components/sections/continue-section";
 
 export default async function Home() {
@@ -26,6 +27,7 @@ export default async function Home() {
         categoryTrends={categoryTrends}
         cityTotals={summary.cities}
       />
+      <CaseStudiesSection />
       <ContinueSection />
     </>
   );

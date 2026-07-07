@@ -31,4 +31,4 @@ This is expanded fully in [ETHICS.md](ETHICS.md), but the short version: this da
 
 ## Case study sourcing
 
-Any specific human case referenced in the narrative sections of the site will come from **already-published, public-record sources** — news reporting, court records, or official government reports (e.g., DOJ reviews) — never from re-identifying anyone in the open incident data. Sourcing/citations for every case study used will be listed alongside that section of the site once built.
+Any specific human case referenced in the narrative sections of the site comes from **already-published, public-record sources** — news reporting, court records, or official government reports (e.g., fatality review committees) — never from re-identifying anyone in the open incident data. As of Milestone 8, three case studies are live (one per city, all web-search-verified against official/primary sources, not recalled from memory); full sourcing notes, verification process, and a caution about one statistic that could *not* be independently re-verified (and was therefore left out) are documented in [CASE_STUDIES.md](CASE_STUDIES.md).
