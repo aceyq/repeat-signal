@@ -17,8 +17,8 @@ Built one milestone at a time. Each milestone is only started after the previous
 - [x] **Milestone 4 — Frontend scaffold & design system**
   Next.js 16 (App Router, TypeScript, Tailwind v4) initialized in `frontend/`. Dark-first design system (Fraunces + Inter fonts, per-city accent colors, class-based dark mode toggle via `next-themes`), header/footer layout shell, and a typed API client (`lib/api.ts`) verified end-to-end against the live backend — the placeholder homepage renders real numbers (1,652,117 total incidents) fetched server-side from Postgres through FastAPI. Production build, lint, and a Playwright screenshot check (dark + light mode, no console errors) all pass. Public Vercel deployment deferred to Milestone 10, once there's an actual homepage worth showing.
 
-- [ ] **Milestone 5 — Homepage hero & scrollytelling intro**
-  The first-impression landing sequence — this is the "documentary opening" and the highest-leverage design work in the project.
+- [x] **Milestone 5 — Homepage hero & scrollytelling intro**
+  Full-viewport hero (scroll-linked parallax fade, ambient seeded dot field, per-city accent glows) followed by a four-beat scrollytelling narrative: the project's premise (responsibly reframed from its true-crime-reporting origin), the real data scale (animated count-up of the actual 1,652,117 incidents and per-city breakdown), the data's limits stated up front (not buried — ties directly to `docs/ETHICS.md`), and a closing transition into the sections still to come. Verified with a scripted Playwright scroll-through in dark mode, light mode, and a mobile viewport; caught and fixed a real bug where the count-up animation silently never completed on genuine incremental scrolling (rewritten from Framer Motion's `animate()`/`useMotionValue` to a plain `IntersectionObserver` + `requestAnimationFrame` tween). See `frontend/README.md` for implementation notes.
 
 - [ ] **Milestone 6 — Interactive map section**
   MapLibre GL map(s) showing neighborhood-level patterns across the three cities, with smooth transitions tied to scroll/narrative position.

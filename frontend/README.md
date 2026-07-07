@@ -27,18 +27,24 @@ Visit `http://localhost:3000`.
 ```
 frontend/
 ├── app/
-│   ├── layout.tsx     # fonts, ThemeProvider, header/footer shell
-│   ├── page.tsx        # temporary placeholder home page (real hero: Milestone 5)
-│   └── globals.css     # design tokens (Tailwind v4 @theme)
+│   ├── layout.tsx       # fonts, ThemeProvider, header/footer shell
+│   ├── page.tsx          # homepage: hero + scrollytelling intro (Milestone 5)
+│   └── globals.css       # design tokens (Tailwind v4 @theme)
 ├── components/
-│   ├── site-header.tsx
-│   ├── site-footer.tsx
-│   ├── theme-provider.tsx
-│   └── theme-toggle.tsx
+│   ├── site-header.tsx, site-footer.tsx, theme-provider.tsx, theme-toggle.tsx
+│   ├── sections/          # homepage narrative beats (hero, premise, stats, limits, continue)
+│   └── ui/                # reusable primitives (reveal-on-scroll, animated count-up, ambient background)
 └── lib/
-    ├── api.ts          # typed fetch client for the backend
-    └── types.ts        # mirrors backend/app/schemas.py
+    ├── api.ts            # typed fetch client for the backend
+    └── types.ts          # mirrors backend/app/schemas.py
 ```
+
+## Scrollytelling implementation notes (Milestone 5)
+
+- **Narrative reveals** (`components/ui/reveal.tsx`) use Framer Motion's `whileInView` with `once: true` — simple, robust, and standard for this kind of site. No scroll-linked pinning/scrubbing for the narrative text; that's reserved for the hero's parallax fade only (`components/sections/hero-section.tsx`, via `useScroll`/`useTransform`).
+- **Count-up numbers** (`components/ui/animated-number.tsx`) intentionally do **not** use Framer Motion's `animate()` + `useMotionValue` combo — an earlier version built that way silently never completed the animation on real (non-instant) scroll in testing, only appearing to work under artificial `scrollIntoView` jumps. Replaced with a plain `IntersectionObserver` + `requestAnimationFrame` tween, which is simple enough to fully reason about and was verified correct via a scripted Playwright scroll-through (dark mode, light mode, and mobile viewport) before considering this milestone done.
+- All animated components respect `prefers-reduced-motion` (via Framer Motion's `useReducedMotion`), checked from the start rather than bolted on later — full accessibility audit is still Milestone 9.
+- The ambient hero background (`components/ui/signal-field.tsx`) uses a seeded pseudo-random generator (not `Math.random()`) so server and client render the same dot layout — avoids a hydration mismatch.
 
 ## A note on Next.js 16
 

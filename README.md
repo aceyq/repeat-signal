@@ -2,7 +2,7 @@
 
 *A working title — an interactive data-storytelling project exploring patterns in public police report and 911 call-for-service data across multiple U.S. cities.*
 
-> **Status:** 🚧 Early development — Milestone 4 of 10 complete: architecture, repo setup, live data exploration, a working cross-city data pipeline, a tested FastAPI + PostgreSQL backend, and a Next.js frontend scaffold with a dark-first design system, verified end-to-end against real data.
+> **Status:** 🚧 Early development — Milestone 5 of 10 complete: architecture, repo setup, live data exploration, a working cross-city data pipeline, a tested FastAPI + PostgreSQL backend, and a real homepage — hero and scrollytelling intro — driven by live data.
 
 ## What this is
 
