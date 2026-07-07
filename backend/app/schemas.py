@@ -52,3 +52,25 @@ class SummaryOut(BaseModel):
     date_range_start: date
     date_range_end: date
     cities: list[CityOut]
+
+
+class NeighborhoodFeatureProperties(BaseModel):
+    id: str
+    city: str
+    name: str
+    incident_count: int
+
+
+class NeighborhoodFeature(BaseModel):
+    type: str = "Feature"
+    geometry: dict[str, Any]
+    properties: NeighborhoodFeatureProperties
+
+
+class NeighborhoodFeatureCollection(BaseModel):
+    """Neighborhood boundaries + incident totals as one GeoJSON payload for the map
+    (Milestone 6). Geometry is simplified for web delivery -- see
+    routers/neighborhoods.py -- the database keeps full-precision boundaries."""
+
+    type: str = "FeatureCollection"
+    features: list[NeighborhoodFeature]

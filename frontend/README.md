@@ -32,11 +32,14 @@ frontend/
 │   └── globals.css       # design tokens (Tailwind v4 @theme)
 ├── components/
 │   ├── site-header.tsx, site-footer.tsx, theme-provider.tsx, theme-toggle.tsx
-│   ├── sections/          # homepage narrative beats (hero, premise, stats, limits, continue)
+│   ├── sections/          # homepage narrative beats (hero, premise, stats, limits, map, continue)
 │   └── ui/                # reusable primitives (reveal-on-scroll, animated count-up, ambient background)
 └── lib/
     ├── api.ts            # typed fetch client for the backend
-    └── types.ts          # mirrors backend/app/schemas.py
+    ├── types.ts          # mirrors backend/app/schemas.py
+    ├── map-config.ts     # basemap style URLs, per-city accent metadata
+    ├── color-utils.ts    # hex -> rgba for MapLibre paint expressions
+    └── geo-utils.ts      # GeoJSON bounding-box helper (avoids a full turf.js dependency)
 ```
 
 ## Scrollytelling implementation notes (Milestone 5)
@@ -45,6 +48,19 @@ frontend/
 - **Count-up numbers** (`components/ui/animated-number.tsx`) intentionally do **not** use Framer Motion's `animate()` + `useMotionValue` combo — an earlier version built that way silently never completed the animation on real (non-instant) scroll in testing, only appearing to work under artificial `scrollIntoView` jumps. Replaced with a plain `IntersectionObserver` + `requestAnimationFrame` tween, which is simple enough to fully reason about and was verified correct via a scripted Playwright scroll-through (dark mode, light mode, and mobile viewport) before considering this milestone done.
 - All animated components respect `prefers-reduced-motion` (via Framer Motion's `useReducedMotion`), checked from the start rather than bolted on later — full accessibility audit is still Milestone 9.
 - The ambient hero background (`components/ui/signal-field.tsx`) uses a seeded pseudo-random generator (not `Math.random()`) so server and client render the same dot layout — avoids a hydration mismatch.
+
+## Map implementation notes (Milestone 6)
+
+`components/sections/map-section.tsx` is a pinned/sticky MapLibre map inside a tall (300vh) scroll container — as the user scrolls, `useScroll`/`useMotionValueEvent` compute which of the three cities is "active," and the map flies to that city's bounds and recolors its neighborhoods as a choropleth (fill intensity driven by incident count, colored with that city's accent hue). Basemap tiles come from [OpenFreeMap](https://openfreemap.org/) — free, tokenless vector tiles, consistent with why MapLibre (not Mapbox GL) was chosen in the first place (see `docs/ARCHITECTURE.md`); it also ships a real dark-mode style, so the map swaps basemaps to match the site's theme toggle, not just the choropleth colors.
+
+Two real bugs came up building this, both worth knowing if you touch this component again:
+
+1. **MapLibre overrides the container's `position` style via inline JS** (sets it to `relative` so it can position its own internal canvas layers), which silently broke our Tailwind `absolute inset-0` sizing class on the same element — the container rendered at zero height and nothing appeared. Fixed by wrapping in an extra `absolute inset-0` div and giving MapLibre a plain `h-full w-full` div as its actual container, never the positioned one.
+2. **Negative z-index on the map container escaped its intended stacking context** and rendered behind unrelated sibling sections instead of just behind the text overlay in front of it. Fixed by keeping the map at normal stack order and giving the overlay content `relative z-10` instead of pushing the map to `-z-10` — elevate the foreground, don't bury the background.
+
+Both were caught by actually looking at Playwright screenshots rather than trusting "no console errors" — the map failed silently in both cases.
+
+Neighborhood GeoJSON is fetched per city on demand (`GET /api/neighborhoods/geojson?city=`) and cached in a ref, not fetched all at once — see `backend/README.md` for why (payload size).
 
 ## A note on Next.js 16
 

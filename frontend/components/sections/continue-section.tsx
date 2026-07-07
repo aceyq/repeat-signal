@@ -13,15 +13,15 @@ export function ContinueSection() {
       </Reveal>
       <Reveal delay={0.2}>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-          From here: where these incidents cluster on the map, how categories and trends shift
-          over time, and specific, already-public cases that put a human face on what the
-          numbers show. Every section carries its limits with it, the same way this one did.
+          The map above shows where these incidents cluster &mdash; it doesn&apos;t show why, or
+          what should be done about it. Next: how categories and trends shift over time, and
+          specific, already-public cases that put a human face on what the numbers show. Every
+          section carries its limits with it, the same way this one did.
         </p>
       </Reveal>
       <Reveal delay={0.35}>
         <p className="mt-10 text-sm text-muted">
-          The map, trend charts, and case studies are under construction &mdash; next up in this
-          build.
+          The trend charts and case studies are under construction &mdash; next up in this build.
         </p>
       </Reveal>
     </section>

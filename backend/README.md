@@ -70,6 +70,7 @@ pytest
 | `GET /api/categories` | Shared taxonomy categories with totals (see `../scripts/category_mapping.py`) |
 | `GET /api/neighborhoods?city=` | Neighborhood listing, optionally filtered by city |
 | `GET /api/neighborhoods/{id}` | Single neighborhood detail, including boundary geometry as GeoJSON |
+| `GET /api/neighborhoods/geojson?city=&category=` | Neighborhood boundaries + incident totals as one GeoJSON `FeatureCollection`, geometry simplified for web delivery -- powers the Milestone 6 map. Fetched per city on demand, not all 380 neighborhoods at once. |
 | `GET /api/aggregates?city=&category=&neighborhood_id=&start_date=&end_date=` | Filtered monthly incident counts -- the main data endpoint |
 | `GET /api/summary` | Overall totals across all three cities |
 
