@@ -61,3 +61,36 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/*
+  MapLibre's popup (components/sections/map-section.tsx) hardcodes a white
+  background but never sets a text color, so it inherits `body`'s `color` --
+  in dark mode that's a light color on a white box, illegible. Override with
+  our own theme tokens so it's readable in both themes and matches the design
+  system instead of MapLibre's default plain-white box. `!important` because
+  these need to reliably beat maplibre-gl.css regardless of stylesheet
+  import/bundling order.
+*/
+.maplibregl-popup-content {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border);
+  font-family: var(--font-sans);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: var(--surface) !important;
+}
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: var(--surface) !important;
+}
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--surface) !important;
+}
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--surface) !important;
+}

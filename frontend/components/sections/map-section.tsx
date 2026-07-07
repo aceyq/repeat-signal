@@ -42,12 +42,20 @@ function renderCity(
     existingSource.setData(geojson);
   } else {
     map.addSource(SOURCE_ID, { type: "geojson", data: geojson });
-    map.addLayer({
-      id: FILL_LAYER_ID,
-      type: "fill",
-      source: SOURCE_ID,
-      paint: { "fill-color": "#888", "fill-opacity": 1, "fill-outline-color": "#888" },
-    });
+    // Insert below the basemap's own text labels (symbol layers) -- added with no
+    // `beforeId`, our fill would stack on top of everything, including street/place
+    // names, making them unreadable through the tint. Every OpenFreeMap style
+    // (light and dark) puts labels last, so this keeps them legible above us.
+    const firstLabelLayerId = map.getStyle()?.layers?.find((l) => l.type === "symbol")?.id;
+    map.addLayer(
+      {
+        id: FILL_LAYER_ID,
+        type: "fill",
+        source: SOURCE_ID,
+        paint: { "fill-color": "#888", "fill-opacity": 1, "fill-outline-color": "#888" },
+      },
+      firstLabelLayerId,
+    );
 
     map.on("mousemove", FILL_LAYER_ID, (e) => {
       map.getCanvas().style.cursor = "pointer";
