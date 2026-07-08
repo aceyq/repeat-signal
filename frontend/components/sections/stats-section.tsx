@@ -72,6 +72,7 @@ export function StatsSection({ summary }: { summary: Summary }) {
                 total={pictogramTotal}
                 highlighted={pictogramHighlighted}
                 accentVar="--accent-chicago"
+                size={32}
                 label={`${pictogramHighlighted} out of ${pictogramTotal} icons highlighted, representing the ${(domesticShare * 100).toFixed(1)}% of Chicago incidents flagged domestic-related`}
               />
             </div>

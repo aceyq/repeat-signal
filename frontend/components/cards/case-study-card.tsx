@@ -26,7 +26,7 @@ export function CaseStudyCard({ caseStudy, delay = 0 }: { caseStudy: CaseStudy; 
               total={caseStudy.pictogram.total}
               highlighted={caseStudy.pictogram.highlighted}
               accentVar={meta.accentVar}
-              size={7}
+              size={14}
               label={caseStudy.pictogram.caption}
             />
             <p className="mt-2 text-xs text-muted">{caseStudy.pictogram.caption}</p>
