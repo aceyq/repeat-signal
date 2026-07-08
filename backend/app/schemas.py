@@ -40,6 +40,9 @@ class CityOut(BaseModel):
     incident_count: int
     date_range_start: date
     date_range_end: date
+    # Only meaningful for city == "chicago" -- see docs/DATA_DICTIONARY.md and
+    # docs/ETHICS.md on why this signal isn't comparable across cities.
+    chicago_domestic_flag_count: int | None = None
 
 
 class CategoryOut(BaseModel):

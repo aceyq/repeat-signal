@@ -66,7 +66,7 @@ pytest
 | Endpoint | Description |
 |---|---|
 | `GET /api/health` | Basic health check |
-| `GET /api/cities` | Per-city totals and date ranges |
+| `GET /api/cities` | Per-city totals and date ranges (includes `chicago_domestic_flag_count`, null for nyc/sf, for the Milestone 9.5 pictogram) |
 | `GET /api/categories` | Shared taxonomy categories with totals (see `../scripts/category_mapping.py`) |
 | `GET /api/neighborhoods?city=` | Neighborhood listing, optionally filtered by city |
 | `GET /api/neighborhoods/{id}` | Single neighborhood detail, including boundary geometry as GeoJSON |

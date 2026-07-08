@@ -15,6 +15,9 @@ export interface CaseStudy {
   body: string;
   sourceLabel: string;
   sourceUrl: string;
+  /** Optional isotype-style visual for a specific, precise count mentioned in `body`
+   * -- only added where the source gives an exact number (not a rounded estimate). */
+  pictogram?: { total: number; highlighted: number; caption: string };
 }
 
 export const CASE_STUDIES: CaseStudy[] = [
@@ -26,6 +29,11 @@ export const CASE_STUDIES: CaseStudy[] = [
     sourceLabel: "ProPublica, “Domestic Violence Fatalities in Illinois Are Still Not Getting Reviewed” (2025)",
     sourceUrl:
       "https://www.propublica.org/article/deaths-are-rising-but-illinois-domestic-violence-review-boards-have-yet-to-offer-solutions",
+    pictogram: {
+      total: 102,
+      highlighted: 7,
+      caption: "7 of Illinois's 102 counties had established a domestic violence fatality review board",
+    },
   },
   {
     city: "nyc",

@@ -9,6 +9,7 @@ export interface CityStats {
   incident_count: number;
   date_range_start: string; // ISO date
   date_range_end: string; // ISO date
+  chicago_domestic_flag_count: number | null; // only populated for city === "chicago"
 }
 
 export interface CategoryStats {

@@ -1,4 +1,5 @@
 import { Reveal } from "@/components/ui/reveal";
+import { PictogramGrid } from "@/components/ui/pictogram-grid";
 import { CITY_ORDER } from "@/lib/map-config";
 import type { CaseStudy } from "@/lib/case-studies";
 
@@ -19,6 +20,18 @@ export function CaseStudyCard({ caseStudy, delay = 0 }: { caseStudy: CaseStudy; 
         </p>
         <h3 className="mt-3 font-display text-2xl font-medium tracking-tight">{caseStudy.headline}</h3>
         <p className="mt-4 leading-relaxed text-muted">{caseStudy.body}</p>
+        {caseStudy.pictogram && (
+          <div className="mt-5">
+            <PictogramGrid
+              total={caseStudy.pictogram.total}
+              highlighted={caseStudy.pictogram.highlighted}
+              accentVar={meta.accentVar}
+              size={7}
+              label={caseStudy.pictogram.caption}
+            />
+            <p className="mt-2 text-xs text-muted">{caseStudy.pictogram.caption}</p>
+          </div>
+        )}
         <a
           href={caseStudy.sourceUrl}
           target="_blank"

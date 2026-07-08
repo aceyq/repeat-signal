@@ -53,6 +53,7 @@ def get_summary(db: Session = Depends(get_db)) -> SummaryOut:
             func.sum(MonthlyAggregate.incident_count).label("incident_count"),
             func.min(MonthlyAggregate.year_month).label("date_range_start"),
             func.max(MonthlyAggregate.year_month).label("date_range_end"),
+            func.sum(MonthlyAggregate.chicago_domestic_flag_count).label("chicago_domestic_flag_count"),
         ).group_by(MonthlyAggregate.city)
     ).all()
     cities = [CityOut.model_validate(row._mapping) for row in city_rows]
