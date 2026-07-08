@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { SignalField } from "@/components/ui/signal-field";
+import { SignalPulse } from "@/components/ui/signal-pulse";
 import { ScrollCue } from "@/components/ui/scroll-cue";
 
 export function HeroSection() {
@@ -23,6 +24,9 @@ export function HeroSection() {
     <section ref={ref} className="relative flex h-[100svh] flex-col items-center justify-center overflow-hidden px-6">
       <SignalField />
       <motion.div style={{ opacity, y }} className="relative z-10 mx-auto max-w-3xl text-center">
+        <div className="mb-6 flex justify-center">
+          <SignalPulse />
+        </div>
         <motion.p
           initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 12 }}
           animate={{ opacity: 1, y: 0 }}

@@ -97,7 +97,13 @@ The category chart shows each category as a **share of that city's own total inc
 
 Every pictogram traces back to an exact, sourced count — never a rounded illustration invented for effect. Icons fade/scale in on scroll (fast, small stagger, all starting muted), then the highlighted subset transitions to its accent color in its own slower stagger about half a second later, so the "counting through the crowd, some light up" effect reads clearly. Colors are resolved from CSS custom properties in an effect (not a lazy `useState` initializer) since `getComputedStyle` needs `document`, which doesn't exist during SSR — this is one of the few places in the codebase with a justified `eslint-disable` for `react-hooks/set-state-in-effect`, since (unlike the same-looking pattern removed from `theme-toggle.tsx` in Milestone 4) there's no SSR-safe alternative here.
 
-**On the "911 call audio" idea also raised in this feedback round:** deliberately not built. Real 911 recordings, even where technically public record, capture real people's real trauma, and fabricating a realistic-sounding fake call would misrepresent a real kind of event. Flagged this directly rather than building around it silently; an abstract pulse/signal animation (no real or fake audio) was proposed as the responsible alternative for the "make it feel urgent" goal, not yet built as of this commit.
+**On the "911 call audio" idea also raised in this feedback round:** deliberately not built. Real 911 recordings, even where technically public record, capture real people's real trauma, and fabricating a realistic-sounding fake call would misrepresent a real kind of event. Flagged this directly rather than building around it silently; an abstract pulse/signal animation (no real or fake audio) was proposed as the responsible alternative for the "make it feel urgent" goal, and is now built (see below).
+
+Note: the icon sizes shipped in the first pass (18px default, 7px in the case study card) read as unrecognizable dots rather than people once seen live — user feedback caught this. Sizes are now 32px (`stats-section.tsx`) and 14px (`case-study-card.tsx`, where 102 icons still need to fit one card column).
+
+## Signal pulse (hero opening beat)
+
+`components/ui/signal-pulse.tsx` — the abstract alternative proposed (and now built) for the "make it feel urgent, like a heartbeat animation" ask from the same feedback round. A single center dot grows in once on mount (a spring animation, small to full size — the "heartbeat" beat the user pointed to), then three concentric rings loop outward from it indefinitely, echoing the site's name and premise directly: one contact, then another, then another, repeating. It sits above the hero's eyebrow text, ahead of the existing staggered copy entrance. `prefers-reduced-motion` gets a static dot-and-ring with no animation at all, not just a shorter one.
 
 ## A note on Next.js 16
 
