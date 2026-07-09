@@ -6,17 +6,27 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useTheme } from "next-themes";
 import { useMotionValueEvent, useScroll } from "framer-motion";
 import { Reveal } from "@/components/ui/reveal";
+import { FilterChip } from "@/components/ui/filter-chip";
 import { CITY_ORDER, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from "@/lib/map-config";
 import { resolveCssColor, rgba } from "@/lib/color-utils";
 import { computeBBox } from "@/lib/geo-utils";
+import { useFilter } from "@/lib/filter-context";
+import { formatCategoryLabel } from "@/lib/format";
 import type { City } from "@/lib/types";
 
 const SOURCE_ID = "neighborhoods";
 const FILL_LAYER_ID = "neighborhoods-fill";
 
-async function fetchCityGeoJson(city: City): Promise<GeoJSON.FeatureCollection> {
+function cacheKeyFor(city: City, category: string | null) {
+  return `${city}:${category ?? "all"}`;
+}
+
+async function fetchCityGeoJson(city: City, category: string | null): Promise<GeoJSON.FeatureCollection> {
   const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-  const response = await fetch(`${base}/api/neighborhoods/geojson?city=${city}`);
+  const url = new URL("/api/neighborhoods/geojson", base);
+  url.searchParams.set("city", city);
+  if (category) url.searchParams.set("category", category);
+  const response = await fetch(url);
   if (!response.ok) throw new Error(`Failed to load ${city} neighborhoods: ${response.status}`);
   return response.json();
 }
@@ -94,11 +104,14 @@ export function MapSection() {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const popupRef = useRef<maplibregl.Popup | null>(null);
-  const cache = useRef<Partial<Record<City, GeoJSON.FeatureCollection>>>({});
+  const cache = useRef<Record<string, GeoJSON.FeatureCollection>>({});
   const activeCityRef = useRef<City>(CITY_ORDER[0].id);
+  const activeCacheKeyRef = useRef<string>(cacheKeyFor(CITY_ORDER[0].id, null));
+  const lastFlownCityRef = useRef<City | null>(null);
   const currentStyleUrlRef = useRef<string | null>(null);
 
   const { resolvedTheme } = useTheme();
+  const { selectedCategory, toggleCategory } = useFilter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [mapReady, setMapReady] = useState(false);
 
@@ -148,32 +161,39 @@ export function MapSection() {
 
     map.once("styledata", () => {
       if (popupRef.current) {
-        renderCity(map, popupRef.current, activeCityRef.current, cache.current[activeCityRef.current], true);
+        renderCity(map, popupRef.current, activeCityRef.current, cache.current[activeCacheKeyRef.current], true);
       }
     });
     map.setStyle(nextStyle);
   }, [resolvedTheme, mapReady]);
 
-  // Fetch + render whichever city is active as the user scrolls.
+  // Fetch + render whichever city is active as the user scrolls, or whichever
+  // category is selected (Milestone 9.5 follow-up: click a category below to
+  // filter this choropleth too). Only fly the camera when the city itself
+  // changes -- a category change just recolors the same neighborhoods.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
     const city = CITY_ORDER[activeIndex].id;
     activeCityRef.current = city;
+    const key = cacheKeyFor(city, selectedCategory);
 
     let cancelled = false;
     (async () => {
-      if (!cache.current[city]) {
-        cache.current[city] = await fetchCityGeoJson(city);
+      if (!cache.current[key]) {
+        cache.current[key] = await fetchCityGeoJson(city, selectedCategory);
       }
       if (cancelled || !popupRef.current) return;
-      renderCity(map, popupRef.current, city, cache.current[city], false);
+      const skipFlyTo = lastFlownCityRef.current === city;
+      renderCity(map, popupRef.current, city, cache.current[key], skipFlyTo);
+      lastFlownCityRef.current = city;
+      activeCacheKeyRef.current = key;
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [activeIndex, mapReady]);
+  }, [activeIndex, mapReady, selectedCategory]);
 
   return (
     <section ref={sectionRef} className="relative" style={{ height: `${CITY_ORDER.length * 100}vh` }}>
@@ -195,6 +215,14 @@ export function MapSection() {
                 {CITY_ORDER[activeIndex].label}
               </h2>
             </Reveal>
+            {selectedCategory && (
+              <div className="pointer-events-auto mt-3">
+                <FilterChip
+                  label={`Filtered to: ${formatCategoryLabel(selectedCategory)}`}
+                  onClear={() => toggleCategory(selectedCategory)}
+                />
+              </div>
+            )}
           </div>
         </div>
 

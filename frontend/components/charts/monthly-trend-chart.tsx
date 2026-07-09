@@ -1,21 +1,49 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { useChartWidth } from "@/hooks/use-chart-width";
 import { CITY_ORDER } from "@/lib/map-config";
 import { resolveCssColor } from "@/lib/color-utils";
+import { useFilter } from "@/lib/filter-context";
+import { api } from "@/lib/api";
 import type { MonthlyTrend } from "@/lib/types";
 
 const MARGIN = { top: 16, right: 16, bottom: 28, left: 48 };
 const HEIGHT = 360;
+const EMPTY: MonthlyTrend[] = [];
 
 export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
   const { ref: containerRef, width } = useChartWidth<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>(null);
+  const { selectedCategory, selectedCity } = useFilter();
+
+  // The unfiltered `data` prop is fetched server-side once; when a category is
+  // selected, refetch just that slice client-side (same pattern as the map's
+  // per-city geojson fetch) rather than requiring every category's data upfront.
+  // Keyed by which category it was fetched for, rather than reset to null on
+  // every selectedCategory change, so clearing the filter needs no setState here
+  // at all -- activeData just falls back to the original `data` prop below.
+  const [categoryData, setCategoryData] = useState<{ category: string; rows: MonthlyTrend[] } | null>(null);
+  useEffect(() => {
+    if (!selectedCategory) return;
+    let cancelled = false;
+    api.getMonthlyTrends({ category: selectedCategory }).then((rows) => {
+      if (!cancelled) setCategoryData({ category: selectedCategory, rows });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCategory]);
+
+  const activeData = useMemo(() => {
+    if (!selectedCategory) return data;
+    if (categoryData?.category === selectedCategory) return categoryData.rows;
+    return EMPTY;
+  }, [selectedCategory, categoryData, data]);
 
   useEffect(() => {
-    if (!svgRef.current || width === 0 || data.length === 0) return;
+    if (!svgRef.current || width === 0 || activeData.length === 0) return;
 
     const innerWidth = width - MARGIN.left - MARGIN.right;
     const innerHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
@@ -29,7 +57,7 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
     const foregroundColor = resolveCssColor("--foreground");
     const surfaceColor = resolveCssColor("--surface");
 
-    const parsed = data.map((d) => ({ ...d, date: new Date(d.year_month) }));
+    const parsed = activeData.map((d) => ({ ...d, date: new Date(d.year_month) }));
     const byCity = d3.group(parsed, (d) => d.city);
     const allMonths = Array.from(new Set(parsed.map((d) => +d.date))).sort((a, b) => a - b);
 
@@ -73,16 +101,21 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
       .y((d) => y(d.incident_count))
       .curve(d3.curveMonotoneX);
 
+    // City isolation is toggled from CityLegend (real, focusable buttons) rather than
+    // clicking the line itself -- the full-width transparent rect below, needed for
+    // the hover tooltip, sits on top of the chart area and would swallow line clicks.
     for (const meta of CITY_ORDER) {
       const cityData = (byCity.get(meta.id) ?? []).sort((a, b) => +a.date - +b.date);
       if (cityData.length === 0) continue;
       const color = resolveCssColor(meta.accentVar);
+      const dimmed = selectedCity !== null && selectedCity !== meta.id;
 
       g.append("path")
         .datum(cityData)
         .attr("fill", "none")
         .attr("stroke", color)
-        .attr("stroke-width", 2.5)
+        .attr("stroke-width", selectedCity === meta.id ? 3.5 : 2.5)
+        .attr("opacity", dimmed ? 0.2 : 1)
         .attr("d", line);
     }
 
@@ -143,7 +176,7 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
         tooltipRect.attr("width", maxTooltipWidth + 16).attr("height", CITY_ORDER.length * 16 + 8);
         tooltipText.forEach((t) => t.attr("x", 8));
       });
-  }, [data, width]);
+  }, [activeData, width, selectedCity]);
 
   return (
     <div ref={containerRef} className="w-full">

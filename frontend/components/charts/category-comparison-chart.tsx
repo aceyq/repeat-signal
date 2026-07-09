@@ -6,6 +6,7 @@ import { useChartWidth } from "@/hooks/use-chart-width";
 import { CITY_ORDER } from "@/lib/map-config";
 import { resolveCssColor } from "@/lib/color-utils";
 import { formatCategoryLabel } from "@/lib/format";
+import { useFilter } from "@/lib/filter-context";
 import type { CategoryTrend, CityStats } from "@/lib/types";
 
 const ROW_HEIGHT = 64;
@@ -66,6 +67,7 @@ export function CategoryComparisonChart({
 }) {
   const { ref: containerRef, width } = useChartWidth<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>(null);
+  const { selectedCategory, toggleCategory, selectedCity } = useFilter();
 
   useEffect(() => {
     if (!svgRef.current || width === 0 || categoryTrends.length === 0) return;
@@ -119,8 +121,15 @@ export function CategoryComparisonChart({
 
     const g = svg.append("g").attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
+    const isDimmedCategory = (category: string) => selectedCategory !== null && selectedCategory !== category;
+    const barOpacity = (category: string, city: string) => {
+      const cityDimmed = selectedCity !== null && selectedCity !== city;
+      return isDimmedCategory(category) || cityDimmed ? 0.3 : 1;
+    };
+
     // Category row labels -- wrapped onto multiple lines rather than clipped when a
     // label (e.g. "Criminal damage vandalism") is too long to fit on one line.
+    // Clickable: selecting a category filters the map + monthly trend chart together.
     const categoryLabels = g
       .append("g")
       .selectAll<SVGTextElement, string>("text")
@@ -131,6 +140,10 @@ export function CategoryComparisonChart({
       .attr("text-anchor", "end")
       .attr("fill", foregroundColor)
       .attr("font-size", isNarrow ? 11 : 13)
+      .attr("font-weight", (d) => (selectedCategory === d ? 600 : 400))
+      .attr("opacity", (d) => (isDimmedCategory(d) ? 0.45 : 1))
+      .style("cursor", "pointer")
+      .on("click", (_event, d) => toggleCategory(d))
       .text((d) => formatCategoryLabel(d));
     wrapLabel(categoryLabels, MARGIN.left - LABEL_PADDING * 2);
 
@@ -144,17 +157,35 @@ export function CategoryComparisonChart({
 
     for (const category of topCategories) {
       const rows = byCategory.get(category) ?? [];
-      const rowG = g.append("g").attr("transform", `translate(0,${yCategory(category)})`);
+      const rowG = g
+        .append("g")
+        .attr("transform", `translate(0,${yCategory(category)})`)
+        .style("cursor", "pointer")
+        .on("click", () => toggleCategory(category));
+
+      if (selectedCategory === category) {
+        rowG
+          .insert("rect", ":first-child")
+          .attr("x", -MARGIN.left + 4)
+          .attr("y", -6)
+          .attr("width", innerWidth + MARGIN.left - 4)
+          .attr("height", yCategory.bandwidth() + 12)
+          .attr("fill", borderColor)
+          .attr("opacity", 0.3)
+          .attr("rx", 8);
+      }
 
       rowG
-        .selectAll("rect")
+        .selectAll("rect.bar")
         .data(CITY_ORDER.map((meta) => rows.find((r) => r.city === meta.id)).filter((r) => r !== undefined))
         .join("rect")
+        .attr("class", "bar")
         .attr("y", (d) => yCity(d.city) ?? 0)
         .attr("height", yCity.bandwidth())
         .attr("x", 0)
         .attr("width", (d) => xShare(d.share))
         .attr("fill", (d) => resolveCssColor(CITY_ORDER.find((c) => c.id === d.city)!.accentVar))
+        .attr("opacity", (d) => barOpacity(category, d.city))
         .attr("rx", 3)
         .append("title")
         .text((d) => `${d.city}: ${d.share.toFixed(1)}% of that city's incidents`);
@@ -169,9 +200,10 @@ export function CategoryComparisonChart({
         .attr("x", (d) => xShare(d.share) + 6)
         .attr("font-size", isNarrow ? 10 : 11)
         .attr("fill", mutedColor)
+        .attr("opacity", (d) => barOpacity(category, d.city))
         .text((d) => `${d.share.toFixed(1)}%`);
     }
-  }, [categoryTrends, cityTotals, width]);
+  }, [categoryTrends, cityTotals, width, selectedCategory, selectedCity, toggleCategory]);
 
   return (
     <div ref={containerRef} className="w-full">

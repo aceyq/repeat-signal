@@ -1,7 +1,13 @@
+"use client";
+
 import { Reveal } from "@/components/ui/reveal";
+import { FilterChip } from "@/components/ui/filter-chip";
 import { CityLegend } from "@/components/charts/city-legend";
 import MonthlyTrendChart from "@/components/charts/monthly-trend-chart-lazy";
 import CategoryComparisonChart from "@/components/charts/category-comparison-chart-lazy";
+import { useFilter } from "@/lib/filter-context";
+import { formatCategoryLabel } from "@/lib/format";
+import { CITY_ORDER } from "@/lib/map-config";
 import type { CategoryTrend, CityStats, MonthlyTrend } from "@/lib/types";
 
 export function TrendsSection({
@@ -13,6 +19,10 @@ export function TrendsSection({
   categoryTrends: CategoryTrend[];
   cityTotals: CityStats[];
 }) {
+  const { selectedCategory, selectedCity, toggleCategory, toggleCity } = useFilter();
+  const cityLabel = selectedCity ? CITY_ORDER.find((c) => c.id === selectedCity)?.label : null;
+  const hasActiveFilter = selectedCategory || selectedCity;
+
   return (
     <section className="mx-auto max-w-5xl px-6 py-32">
       <Reveal>
@@ -27,9 +37,24 @@ export function TrendsSection({
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
           Monthly incident counts across the full window, one line per city. Watch for
           seasonality, sudden jumps, and the gap between cities of very different sizes &mdash;
-          the shapes matter more here than the absolute totals.
+          the shapes matter more here than the absolute totals. Click a city below to isolate its
+          line, or a category in the chart further down to filter both charts and the map above.
         </p>
       </Reveal>
+
+      {hasActiveFilter && (
+        <Reveal delay={0.25} className="mt-6 flex flex-wrap gap-2">
+          {selectedCategory && (
+            <FilterChip
+              label={`Category: ${formatCategoryLabel(selectedCategory)}`}
+              onClear={() => toggleCategory(selectedCategory)}
+            />
+          )}
+          {selectedCity && cityLabel && (
+            <FilterChip label={`City: ${cityLabel}`} onClear={() => toggleCity(selectedCity)} />
+          )}
+        </Reveal>
+      )}
 
       <Reveal delay={0.3} className="mt-10">
         <CityLegend />
