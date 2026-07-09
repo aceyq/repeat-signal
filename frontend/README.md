@@ -103,7 +103,9 @@ Note: the icon sizes shipped in the first pass (18px default, 7px in the case st
 
 ## Signal pulse (hero opening beat)
 
-`components/ui/signal-pulse.tsx` — the abstract alternative proposed (and now built) for the "make it feel urgent, like a heartbeat animation" ask from the same feedback round. A single center dot grows in once on mount (a spring animation, small to full size — the "heartbeat" beat the user pointed to), then three concentric rings loop outward from it indefinitely, echoing the site's name and premise directly: one contact, then another, then another, repeating. It sits above the hero's eyebrow text, ahead of the existing staggered copy entrance. `prefers-reduced-motion` gets a static dot-and-ring with no animation at all, not just a shorter one.
+`components/ui/signal-pulse.tsx` — a small, persistent version of the site's signal motif that lives above the hero's eyebrow text for the rest of the visit: a center dot with rings looping outward indefinitely. `prefers-reduced-motion` gets a static dot-and-ring with no animation at all, not just a shorter one.
+
+The first version of this (a small pulse only in the hero, no separate intro) turned out too subtle to register as an intentional feature once seen live — user feedback was "I don't see the pulsing animation at all" and that the site still didn't feel like it was telling a story. That prompted `components/ui/intro-overlay.tsx`: a full-viewport title card that plays once on every fresh load, before the hero appears at all. Three short beats ("One contact with police." / "Then another." / "Then a pattern begins.") each pair a growing, repeating signal pulse with a line of text, narrating the project's own premise directly rather than just decorating the page, then fades out into the hero underneath (whose own small persistent pulse, above, picks up the motif at a smaller scale). Skippable at any point by click, tap, or keypress — this is an entrance, not a gate. `prefers-reduced-motion` skips the overlay entirely rather than showing a shortened version of it, going straight to the hero with no delay.
 
 ## A note on Next.js 16
 
