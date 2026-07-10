@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 import { FilterProvider } from "@/lib/filter-context";
 import { CallChapter } from "@/components/sections/call-chapter";
+import { ResponseChapter } from "@/components/sections/response-chapter";
 import { PremiseSection } from "@/components/sections/premise-section";
 import { StatsSection } from "@/components/sections/stats-section";
 import { LimitsSection } from "@/components/sections/limits-section";
@@ -19,6 +20,7 @@ export default async function Home() {
   return (
     <FilterProvider>
       <CallChapter />
+      <ResponseChapter />
       <PremiseSection />
       <StatsSection summary={summary} />
       <LimitsSection />
