@@ -11,11 +11,14 @@ import { ScrollCue } from "@/components/ui/scroll-cue";
 
 // Cold-open timeline (seconds from mount) -- plays once, independent of
 // scroll. Named so the sequence reads as one deliberate beat, not decimals.
-const GLOW_FADE_START = 0.8;
-const GLOW_FADE_DURATION = 1.3;
-const BADGE_DELAY = 1.3;
-const WAVEFORM_DELAY = 1.9;
-const TIMER_DELAY = 2.1;
+// Kept tight (badge through the real quote all land within ~5s) after user
+// feedback that the original pacing left too long a stretch of "just a
+// timer, no text" before anything grounded the scene.
+const GLOW_FADE_START = 0.5;
+const GLOW_FADE_DURATION = 0.9;
+const BADGE_DELAY = 0.5;
+const WAVEFORM_DELAY = 0.8;
+const TIMER_DELAY = 0.9;
 
 // Scroll-progress breakpoints across the chapter's pinned scroll height (see
 // CHAPTER_HEIGHT_VH below). The dispatch console holds undisturbed through
