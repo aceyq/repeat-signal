@@ -9,7 +9,8 @@ export function CaseStudyCard({ caseStudy, delay = 0 }: { caseStudy: CaseStudy; 
   return (
     <Reveal delay={delay}>
       <article
-        className="rounded-lg border border-border bg-surface p-8"
+        id={`case-study-${caseStudy.city}`}
+        className="scroll-mt-24 rounded-lg border border-border bg-surface p-8"
         style={{ borderLeftColor: `var(${meta.accentVar})`, borderLeftWidth: 3 }}
       >
         <p
