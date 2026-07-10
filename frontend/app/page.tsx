@@ -1,7 +1,6 @@
 import { api } from "@/lib/api";
 import { FilterProvider } from "@/lib/filter-context";
-import { IntroOverlay } from "@/components/ui/intro-overlay";
-import { HeroSection } from "@/components/sections/hero-section";
+import { CallChapter } from "@/components/sections/call-chapter";
 import { PremiseSection } from "@/components/sections/premise-section";
 import { StatsSection } from "@/components/sections/stats-section";
 import { LimitsSection } from "@/components/sections/limits-section";
@@ -19,8 +18,7 @@ export default async function Home() {
 
   return (
     <FilterProvider>
-      <IntroOverlay />
-      <HeroSection />
+      <CallChapter />
       <PremiseSection />
       <StatsSection summary={summary} />
       <LimitsSection />

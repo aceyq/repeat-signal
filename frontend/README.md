@@ -32,10 +32,11 @@ frontend/
 │   └── globals.css       # design tokens (Tailwind v4 @theme)
 ├── components/
 │   ├── site-header.tsx, site-footer.tsx, theme-provider.tsx, theme-toggle.tsx
-│   ├── sections/          # homepage narrative beats (hero, premise, stats, limits, map, trends, case studies, closing)
+│   ├── sections/          # homepage narrative beats: call-chapter.tsx (opening), premise, stats, limits, map, trends, case studies, closing
+│   ├── dispatch/           # reusable dispatch-console primitives (badge, waveform, timer, transcript) -- see below
 │   ├── charts/             # D3 charts + shared city-color legend
 │   ├── cards/               # case-study-card.tsx
-│   └── ui/                 # reusable primitives (reveal-on-scroll, animated count-up, ambient background)
+│   └── ui/                 # reusable primitives (reveal-on-scroll, animated count-up, scene-atmosphere.tsx)
 ├── hooks/
 │   └── use-chart-width.ts  # ResizeObserver-based responsive sizing for D3 charts
 └── lib/
@@ -48,12 +49,26 @@ frontend/
     └── case-studies.ts    # the 3 case studies (Milestone 8) -- see docs/CASE_STUDIES.md for sourcing
 ```
 
-## Scrollytelling implementation notes (Milestone 5)
+## Chapter 1: The Call (opening dispatch sequence)
 
-- **Narrative reveals** (`components/ui/reveal.tsx`) use Framer Motion's `whileInView` with `once: true` — simple, robust, and standard for this kind of site. No scroll-linked pinning/scrubbing for the narrative text; that's reserved for the hero's parallax fade only (`components/sections/hero-section.tsx`, via `useScroll`/`useTransform`).
+The homepage's opening replaced the earlier hero/intro-overlay/pulse setup (Milestones 5 and 9.5) with a single cinematic chapter, `components/sections/call-chapter.tsx`, built from user direction to open like "an active emergency dispatch center" rather than a typical hero banner:
+
+1. **Cold open** — the screen starts black, a soft glow fades in ~800ms later revealing a dispatch console: a `DispatchBadge` ("911 · Call in progress"), an organic-feeling `CallWaveform` (40 bars, each with its own seeded amplitude envelope and loop timing — not a uniform equalizer), a live-ticking `CallTimer`, and a `CallTranscript` that reveals three illustrative dispatch lines a few seconds apart.
+2. **First scroll** — scrolling shrinks and fades the console, then reveals three large typographic statements one at a time ("Every emergency call begins with someone asking for help." → "Some calls receive help immediately. Others don't." → "Every second matters."), pinned within a 450vh scroll section.
+3. **Visual language** — `components/ui/scene-atmosphere.tsx` layers a cursor-following spotlight, a vignette, and film grain (all pure CSS, no image assets, same "no external asset dependency" philosophy as `signal-field.tsx`). The vignette/spotlight are dark-mode only (`dark:` variants) — a black-edged vignette against light mode's cream background read as a muddy smear rather than cinematic depth once actually seen in light mode, caught by testing both themes rather than assuming dark-mode styling would just carry over.
+
+All the dispatch primitives (`components/dispatch/`) are built as standalone, reusable pieces — not because this pass needs them elsewhere yet, but because later chapters (see the roadmap's chapter-system notes) are expected to reuse the same dispatch-console visual language.
+
+**On the transcript content:** the user's brief specified an actual illustrative line ("Caller: I don't think he's breathing.") — the earlier decision in this project was to avoid real *or fabricated* 911 **audio** specifically because a realistic-sounding recording risks misrepresenting a real emergency. A short, clearly-labeled text reconstruction is a different medium and a lighter-weight case (no voice, no specific case, authored directly by the project owner as illustrative UI copy), but the same underlying concern — a visitor mistaking this for a real transcript — still applies to text. Added a small, permanent caption directly under the transcript ("Reconstructed dialogue, for illustration — not an actual call") as a low-cost safeguard; flagged here rather than added silently, since the user may prefer to drop it in the name of the brief's "keep everything minimal" instruction.
+
+**A real, time-consuming bug worth documenting:** the original implementation drove the shrink/fade transition with `useTransform(scrollYProgress, [a, b], [1, 0])` bound directly via `style={{ opacity, scale, y }}` on a `motion.div` — the same pattern that worked fine in the old `hero-section.tsx`. Here it didn't: the underlying `MotionValue` read back correctly everywhere it was checked (`.get()`, a live on-screen debug readout), but the actual painted DOM element's `getComputedStyle().opacity` diverged from it and never reliably reached 0, so scroll-away content kept visibly overlapping the incoming statement text. Bisected by stripping the JSX down to a single hardcoded `style={{opacity: 0.05}}` div (confirmed real hardcoded opacity paints correctly) and then reintroducing the scroll-driven value (confirmed broken again) — isolated to something specific about this combination (a tall `offset: ["start start", "end end"]` pinned section, several simultaneous `useTransform` outputs on one style object) rather than `useTransform` in general. Rather than chase the exact root cause further, rewrote the transition to compute the same piecewise-linear/clamped math **imperatively** inside `useMotionValueEvent(scrollYProgress, "change", ...)`, calling `.set()` on plain `useMotionValue()`s — the same architectural pattern `map-section.tsx` already uses successfully to derive its active-city index from scroll. Confirmed fixed via the same bisection screenshots, both dev and production builds.
+
+## Other scrollytelling implementation notes (Milestone 5)
+
+- **Narrative reveals** (`components/ui/reveal.tsx`) use Framer Motion's `whileInView` with `once: true` — simple, robust, and standard for this kind of site.
 - **Count-up numbers** (`components/ui/animated-number.tsx`) intentionally do **not** use Framer Motion's `animate()` + `useMotionValue` combo — an earlier version built that way silently never completed the animation on real (non-instant) scroll in testing, only appearing to work under artificial `scrollIntoView` jumps. Replaced with a plain `IntersectionObserver` + `requestAnimationFrame` tween, which is simple enough to fully reason about and was verified correct via a scripted Playwright scroll-through (dark mode, light mode, and mobile viewport) before considering this milestone done.
 - All animated components respect `prefers-reduced-motion` (via Framer Motion's `useReducedMotion`), checked from the start rather than bolted on later — full accessibility audit is still Milestone 9.
-- The ambient hero background (`components/ui/signal-field.tsx`) uses a seeded pseudo-random generator (not `Math.random()`) so server and client render the same dot layout — avoids a hydration mismatch.
+- `components/ui/signal-field.tsx` (the seeded ambient dot field, now used by `loading-screen.tsx`) uses a seeded pseudo-random generator (not `Math.random()`) so server and client render the same dot layout — avoids a hydration mismatch.
 
 ## Map implementation notes (Milestone 6)
 
@@ -101,11 +116,9 @@ Every pictogram traces back to an exact, sourced count — never a rounded illus
 
 Note: the icon sizes shipped in the first pass (18px default, 7px in the case study card) read as unrecognizable dots rather than people once seen live — user feedback caught this. Sizes are now 32px (`stats-section.tsx`) and 14px (`case-study-card.tsx`, where 102 icons still need to fit one card column).
 
-## Signal pulse (hero opening beat)
+## Superseded: hero pulse / intro overlay
 
-`components/ui/signal-pulse.tsx` — a small, persistent version of the site's signal motif that lives above the hero's eyebrow text for the rest of the visit: a center dot with rings looping outward indefinitely. `prefers-reduced-motion` gets a static dot-and-ring with no animation at all, not just a shorter one.
-
-The first version of this (a small pulse only in the hero, no separate intro) turned out too subtle to register as an intentional feature once seen live — user feedback was "I don't see the pulsing animation at all" and that the site still didn't feel like it was telling a story. That prompted `components/ui/intro-overlay.tsx`: a full-viewport title card that plays once on every fresh load, before the hero appears at all. It now opens with an abstract "call" beat (see below), then three short caption beats ("One contact with police." / "Then another." / "Then a pattern begins.") each pairing a growing, repeating signal pulse with a line of text, narrating the project's own premise directly rather than just decorating the page, then fades out into the hero underneath (whose own small persistent pulse, above, picks up the motif at a smaller scale). Skippable at any point by click, tap, or keypress — this is an entrance, not a gate. `prefers-reduced-motion` skips the overlay entirely rather than showing a shortened version of it, going straight to the hero with no delay.
+Between the pictogram round above and Chapter 1: The Call, the opening went through two earlier versions — a small persistent pulse icon in the hero (too subtle to register as intentional, per user feedback: "I don't see the pulsing animation at all"), then a full-viewport skippable title card (`intro-overlay.tsx`) with a pulse-and-caption sequence. Both are gone now, replaced entirely by the dispatch cold-open described above, which is what the user actually wants the opening to be rather than a decoration bolted onto a conventional hero. Noted here rather than silently deleted from history, since the same lesson (default to something bigger/more literal for this project's "make an impact" asks, rather than a tasteful understatement) is still the operating one — see the project memory for the full note.
 
 ## Click-to-filter charts and map
 
