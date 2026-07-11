@@ -58,7 +58,16 @@ function renderCity(
         id: FILL_LAYER_ID,
         type: "fill",
         source: SOURCE_ID,
-        paint: { "fill-color": "#888", "fill-opacity": 1, "fill-outline-color": "#888" },
+        paint: {
+          "fill-color": "#888",
+          "fill-opacity": 1,
+          "fill-outline-color": "#888",
+          // Density recolors on every city switch and category filter change --
+          // transitioning it rather than snapping instantly is what makes the
+          // choropleth read as "incidents fading in" instead of a hard cut.
+          "fill-color-transition": { duration: 700 },
+          "fill-outline-color-transition": { duration: 700 },
+        },
       },
       firstLabelLayerId,
     );
@@ -208,12 +217,17 @@ export function MapSection() {
         <div className="pointer-events-none relative z-10 mx-auto w-full max-w-6xl px-6 pt-16">
           <div className="inline-block rounded-lg bg-background/80 px-4 py-3 backdrop-blur">
             <Reveal>
-              <p className="text-sm uppercase tracking-[0.3em] text-muted">Where it lands</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 03 &middot; The City</p>
             </Reveal>
             <Reveal delay={0.1}>
               <h2 className="mt-2 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
                 {CITY_ORDER[activeIndex].label}
               </h2>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <p className="mt-2 max-w-sm text-sm text-muted">
+                Every neighborhood, shaded by how often it appears in two years of reports.
+              </p>
             </Reveal>
             {selectedCategory && (
               <div className="pointer-events-auto mt-3">
