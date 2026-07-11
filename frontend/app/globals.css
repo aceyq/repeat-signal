@@ -66,6 +66,15 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Smooth-scrolls anchor jumps (e.g. the chapter nav, case-study cross-links)
+   -- reduced motion gets an instant jump instead, same standard as every
+   JS-driven animation elsewhere in this project. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /*
   MapLibre's popup (components/sections/map-section.tsx) hardcodes a white
   background but never sets a text color, so it inherits `body`'s `color` --

@@ -100,7 +100,7 @@ export function CaseStudyCard({ caseStudy, delay = 0 }: { caseStudy: CaseStudy; 
                   <p className="mt-5 text-sm text-muted">
                     Full minute-by-minute timeline in{" "}
                     <a
-                      href="#chapter-response"
+                      href="#chapter-2"
                       className="underline decoration-border underline-offset-4 hover:text-accent-sf"
                     >
                       Chapter 02 &middot; The Response

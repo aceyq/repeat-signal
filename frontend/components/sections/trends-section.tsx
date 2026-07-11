@@ -24,7 +24,7 @@ export function TrendsSection({
   const hasActiveFilter = selectedCategory || selectedCity;
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-32">
+    <section id="chapter-4" className="mx-auto max-w-5xl scroll-mt-24 px-6 py-32">
       <Reveal>
         <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 04 &middot; The Data</p>
       </Reveal>

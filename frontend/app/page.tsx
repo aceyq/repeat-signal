@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
 import { FilterProvider } from "@/lib/filter-context";
+import { ChapterNav } from "@/components/ui/chapter-nav";
 import { CallChapter } from "@/components/sections/call-chapter";
 import { ResponseChapter } from "@/components/sections/response-chapter";
 import { PremiseSection } from "@/components/sections/premise-section";
@@ -21,6 +22,7 @@ export default async function Home() {
 
   return (
     <FilterProvider>
+      <ChapterNav />
       <CallChapter />
       <ResponseChapter />
       <PremiseSection />

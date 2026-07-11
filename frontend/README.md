@@ -183,6 +183,14 @@ No new backend work was needed — `GET /api/aggregates?city=&category=` (alread
 
 The neighborhood ranking includes an "Unknown" bucket where `neighborhood_name` is null (a small number of incidents that didn't match a boundary during the Milestone 2 geospatial join) rather than silently dropping those rows — consistent with this project's general practice of surfacing data limitations instead of hiding them.
 
+## Chapter navigator
+
+`components/ui/chapter-nav.tsx` — the floating "CASE FILE" rail from the original brief, the last piece of the six-chapter system. Fixed to the left edge, `hidden lg:block` (a persistent side rail doesn't have room on narrow screens, and every chapter is still reachable by scrolling normally). Stays invisible until the reader scrolls past the opening beat, then fades in and highlights whichever chapter section is currently in view.
+
+Highlighting uses a plain `IntersectionObserver` "scrollspy" — a thin detection band (`rootMargin: "-35% 0px -55% 0px"`) near the top third of the viewport; whichever chapter section intersects that band is "active." This is deliberately not a scroll-linked Framer Motion value: the nav only ever needs to know *which* chapter is current, never an exact scroll position, and Chapter 1's `useTransform` bug (see below) is reason enough to keep this mechanism as simple as possible. The active indicator itself is a small sliding bar using Framer Motion's `layoutId` shared-element animation, so it glides between list items instead of jumping.
+
+Every chapter section carries a stable `id="chapter-N"` (Chapter 2's was renamed from `chapter-response` to match; `case-study-card.tsx`'s SF cross-link was updated accordingly), and `globals.css` adds a reduced-motion-gated `scroll-behavior: smooth` so clicking a nav entry glides to that chapter rather than snapping. Both the nav's fade-in and the indicator's slide collapse to near-instant under `prefers-reduced-motion`.
+
 ## A note on Next.js 16
 
 This project uses Next.js 16, which shipped after this assistant's training cutoff with real breaking changes (Turbopack on by default, fully-async `params`/`searchParams`, opt-in Cache Components/PPR). Before writing App Router code here, check `node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md` (bundled with the installed package) rather than assuming older Next.js conventions still apply.

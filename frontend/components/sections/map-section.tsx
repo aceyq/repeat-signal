@@ -205,7 +205,7 @@ export function MapSection() {
   }, [activeIndex, mapReady, selectedCategory]);
 
   return (
-    <section ref={sectionRef} className="relative" style={{ height: `${CITY_ORDER.length * 100}vh` }}>
+    <section id="chapter-3" ref={sectionRef} className="relative" style={{ height: `${CITY_ORDER.length * 100}vh` }}>
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-background">
         {/* MapLibre sets `position: relative` on whatever container it's given (an
             inline style, so it overrides Tailwind's `absolute` class) -- an extra

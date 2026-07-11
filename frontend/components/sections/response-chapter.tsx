@@ -93,7 +93,7 @@ function TimelineRow({ event, delay, isLast }: { event: TimelineEvent; delay: nu
 
 export function ResponseChapter() {
   return (
-    <section id="chapter-response" className="mx-auto max-w-3xl scroll-mt-24 px-6 py-32">
+    <section id="chapter-2" className="mx-auto max-w-3xl scroll-mt-24 px-6 py-32">
       <Reveal>
         <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 02 &middot; The Response</p>
       </Reveal>

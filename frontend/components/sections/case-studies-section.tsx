@@ -4,7 +4,7 @@ import { CASE_STUDIES } from "@/lib/case-studies";
 
 export function CaseStudiesSection() {
   return (
-    <section className="mx-auto max-w-5xl px-6 py-32">
+    <section id="chapter-5" className="mx-auto max-w-5xl scroll-mt-24 px-6 py-32">
       <Reveal>
         <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 05 &middot; The Stories</p>
       </Reveal>

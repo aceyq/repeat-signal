@@ -123,7 +123,7 @@ export function CallChapter() {
   });
 
   return (
-    <section ref={sectionRef} className="relative" style={{ height: `${CHAPTER_HEIGHT_VH}vh` }}>
+    <section id="chapter-1" ref={sectionRef} className="relative" style={{ height: `${CHAPTER_HEIGHT_VH}vh` }}>
       <div className="sticky top-0 flex h-[100svh] flex-col items-center justify-center overflow-hidden bg-background">
         <SceneAtmosphere />
 

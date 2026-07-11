@@ -71,7 +71,7 @@ export function ExploreChapter({ categories }: { categories: CategoryStats[] }) 
   const maxCount = topNeighborhoods[0]?.[1] ?? 1;
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-32">
+    <section id="chapter-6" className="mx-auto max-w-3xl scroll-mt-24 px-6 py-32">
       <Reveal>
         <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 06 &middot; Explore</p>
       </Reveal>
