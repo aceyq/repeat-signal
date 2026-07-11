@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/reveal";
 
 type EventType = "call" | "dispatch" | "custody" | "outcome";
@@ -25,7 +29,8 @@ interface TimelineEvent {
  * Timestamps prefixed "~" are this project's own arithmetic from the
  * report's relative statements (e.g. "five minutes later", "within three
  * minutes") rather than an absolute time stated directly in the source --
- * flagged so a future editor doesn't mistake them for directly-quoted times.
+ * flagged so a future editor doesn't mistake them for directly-quoted times,
+ * and surfaced to the reader on hover (see TimelineRow) for the same reason.
  */
 const TIMELINE: TimelineEvent[] = [
   { id: "e1", time: "8:37 PM", type: "call", label: "First call. She says he's leaving; no response requested." },
@@ -73,25 +78,112 @@ const TYPE_LABEL: Record<EventType, string> = {
   outcome: "Outcome",
 };
 
-function TimelineRow({ event, delay, isLast }: { event: TimelineEvent; delay: number; isLast: boolean }) {
+type RowState = "past" | "current" | "upcoming";
+
+function TimelineRow({
+  event,
+  delay,
+  isLast,
+  rowState,
+  registerRef,
+}: {
+  event: TimelineEvent;
+  delay: number;
+  isLast: boolean;
+  rowState: RowState;
+  registerRef: (el: HTMLDivElement | null) => void;
+}) {
+  const prefersReducedMotion = useReducedMotion();
+  const isApprox = event.time.startsWith("~");
+  const isOutcome = event.type === "outcome";
+  const isCurrent = rowState === "current";
+
   return (
-    <Reveal delay={delay} className="relative flex gap-6 pb-10">
-      {!isLast && <span className="absolute left-[5.5rem] top-6 h-full w-px bg-border sm:left-24" />}
-      <span className="w-16 shrink-0 pt-1 text-right font-mono text-xs text-muted sm:w-20 sm:text-sm">
-        {event.time}
-      </span>
-      <span className="relative mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full border border-border bg-background">
-        {event.type === "outcome" && <span className="absolute inset-0 rounded-full bg-foreground" />}
-      </span>
-      <div className="flex-1 pb-2">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted">{TYPE_LABEL[event.type]}</p>
-        <p className="mt-1.5 max-w-xl leading-relaxed text-foreground">{event.label}</p>
+    <Reveal
+      delay={delay}
+      className={`relative flex gap-6 pb-10 ${isOutcome ? "pt-16 sm:pt-24" : ""}`}
+    >
+      <div ref={registerRef} data-event-id={event.id} className="contents">
+        <motion.div
+          className="group relative flex flex-1 gap-6"
+          animate={{ opacity: rowState === "past" ? 0.35 : 1 }}
+          transition={{ duration: prefersReducedMotion ? 0.01 : 0.6 }}
+        >
+          {!isLast && <span className="absolute left-[5.5rem] top-6 h-full w-px bg-border sm:left-24" />}
+          <span className="relative w-16 shrink-0 pt-1 text-right font-mono text-xs text-muted sm:w-20 sm:text-sm">
+            {event.time}
+            {isApprox && (
+              <span
+                tabIndex={0}
+                className="relative ml-0.5 inline-block cursor-help align-top text-[10px] text-muted/60 outline-none"
+              >
+                *
+                <span className="pointer-events-none absolute right-0 top-full z-10 mt-2 w-48 rounded-md border border-border bg-surface p-2.5 text-left text-[11px] normal-case leading-snug text-muted opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                  Approximate — calculated from the report&apos;s relative time language, not stated directly in the
+                  source.
+                </span>
+              </span>
+            )}
+          </span>
+          <span className="relative mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full border border-border bg-background">
+            {isOutcome && <span className="absolute inset-0 rounded-full bg-foreground" />}
+            {isCurrent && (
+              <motion.span
+                aria-hidden
+                className="absolute inset-0 rounded-full bg-foreground"
+                initial={{ opacity: 0.55, scale: 1 }}
+                animate={
+                  prefersReducedMotion ? { opacity: 0.35, scale: 1 } : { opacity: [0.55, 0], scale: [1, isOutcome ? 2.6 : 1.8] }
+                }
+                transition={{ duration: 1.6, repeat: prefersReducedMotion ? 0 : Infinity, ease: "easeOut" }}
+              />
+            )}
+          </span>
+          <div className="flex-1 pb-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted">{TYPE_LABEL[event.type]}</p>
+            <p
+              className={`mt-1.5 max-w-xl leading-relaxed transition-colors duration-500 ${
+                isCurrent ? "text-foreground" : "text-foreground/85"
+              } ${isOutcome ? "font-medium" : ""}`}
+            >
+              {event.label}
+            </p>
+          </div>
+        </motion.div>
       </div>
     </Reveal>
   );
 }
 
 export function ResponseChapter() {
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const rowRefs = useRef(new Map<string, HTMLDivElement>());
+
+  // Same plain-IntersectionObserver "scrollspy" approach as components/ui/chapter-nav.tsx,
+  // not a scroll-linked Framer Motion value -- this only needs to know which row is
+  // currently being read, never an exact scroll offset, and Chapter 1's useTransform bug
+  // (see call-chapter.tsx) is reason enough to keep this mechanism as simple as possible.
+  useEffect(() => {
+    const elements = TIMELINE.map((e) => rowRefs.current.get(e.id)).filter(
+      (el): el is HTMLDivElement => el !== undefined,
+    );
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const intersecting = entries.filter((e) => e.isIntersecting);
+        if (intersecting.length === 0) return;
+        const topMost = intersecting.reduce((a, b) => (a.boundingClientRect.top < b.boundingClientRect.top ? a : b));
+        const id = topMost.target.getAttribute("data-event-id");
+        const idx = TIMELINE.findIndex((e) => e.id === id);
+        if (idx !== -1) setActiveIndex(idx);
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 },
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section id="chapter-2" className="mx-auto max-w-3xl scroll-mt-24 px-6 py-32">
       <Reveal>
@@ -113,7 +205,17 @@ export function ResponseChapter() {
 
       <div className="mt-16">
         {TIMELINE.map((event, i) => (
-          <TimelineRow key={event.id} event={event} delay={Math.min(i * 0.05, 0.3)} isLast={i === TIMELINE.length - 1} />
+          <TimelineRow
+            key={event.id}
+            event={event}
+            delay={Math.min(i * 0.05, 0.3)}
+            isLast={i === TIMELINE.length - 1}
+            rowState={i < activeIndex ? "past" : i === activeIndex ? "current" : "upcoming"}
+            registerRef={(el) => {
+              if (el) rowRefs.current.set(event.id, el);
+              else rowRefs.current.delete(event.id);
+            }}
+          />
         ))}
       </div>
 
