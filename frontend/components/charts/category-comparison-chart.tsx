@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { useReducedMotion } from "framer-motion";
 import { useChartWidth } from "@/hooks/use-chart-width";
+import { useInViewOnce } from "@/hooks/use-in-view-once";
 import { CITY_ORDER } from "@/lib/map-config";
 import { resolveCssColor } from "@/lib/color-utils";
 import { formatCategoryLabel } from "@/lib/format";
@@ -68,9 +70,13 @@ export function CategoryComparisonChart({
   const { ref: containerRef, width } = useChartWidth<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>(null);
   const { selectedCategory, toggleCategory, selectedCity } = useFilter();
+  const prefersReducedMotion = useReducedMotion();
+  const inView = useInViewOnce(containerRef);
+  const hasDrawnRef = useRef(false);
 
   useEffect(() => {
-    if (!svgRef.current || width === 0 || categoryTrends.length === 0) return;
+    if (!svgRef.current || width === 0 || categoryTrends.length === 0 || !inView) return;
+    const isFirstDraw = !hasDrawnRef.current;
 
     const totalByCity = new Map(cityTotals.map((c) => [c.city, c.incident_count]));
     const withShare = categoryTrends.map((row) => ({
@@ -155,7 +161,7 @@ export function CategoryComparisonChart({
       .attr("y2", innerHeight)
       .attr("stroke", borderColor);
 
-    for (const category of topCategories) {
+    topCategories.forEach((category, categoryIndex) => {
       const rows = byCategory.get(category) ?? [];
       const rowG = g
         .append("g")
@@ -175,7 +181,7 @@ export function CategoryComparisonChart({
           .attr("rx", 8);
       }
 
-      rowG
+      const bars = rowG
         .selectAll("rect.bar")
         .data(CITY_ORDER.map((meta) => rows.find((r) => r.city === meta.id)).filter((r) => r !== undefined))
         .join("rect")
@@ -183,27 +189,50 @@ export function CategoryComparisonChart({
         .attr("y", (d) => yCity(d.city) ?? 0)
         .attr("height", yCity.bandwidth())
         .attr("x", 0)
-        .attr("width", (d) => xShare(d.share))
         .attr("fill", (d) => resolveCssColor(CITY_ORDER.find((c) => c.id === d.city)!.accentVar))
-        .attr("opacity", (d) => barOpacity(category, d.city))
-        .attr("rx", 3)
-        .append("title")
-        .text((d) => `${d.city}: ${d.share.toFixed(1)}% of that city's incidents`);
+        .attr("rx", 3);
+      bars.append("title").text((d) => `${d.city}: ${d.share.toFixed(1)}% of that city's incidents`);
 
-      rowG
+      const labels = rowG
         .selectAll("text.value")
         .data(CITY_ORDER.map((meta) => rows.find((r) => r.city === meta.id)).filter((r) => r !== undefined))
         .join("text")
         .attr("class", "value")
         .attr("y", (d) => (yCity(d.city) ?? 0) + yCity.bandwidth() / 2)
         .attr("dy", "0.32em")
-        .attr("x", (d) => xShare(d.share) + 6)
         .attr("font-size", isNarrow ? 10 : 11)
-        .attr("fill", mutedColor)
-        .attr("opacity", (d) => barOpacity(category, d.city))
-        .text((d) => `${d.share.toFixed(1)}%`);
-    }
-  }, [categoryTrends, cityTotals, width, selectedCategory, selectedCity, toggleCategory]);
+        .attr("fill", mutedColor);
+
+      // Bars grow in from zero width and labels fade in alongside them, staggered
+      // row by row, on the chart's first appearance in the viewport -- never on
+      // a later redraw caused by a filter change, which should feel instant.
+      if (isFirstDraw && !prefersReducedMotion) {
+        const rowDelay = Math.min(categoryIndex * 90, 450);
+        bars
+          .attr("width", 0)
+          .attr("opacity", (d) => barOpacity(category, d.city))
+          .transition()
+          .delay(rowDelay)
+          .duration(700)
+          .ease(d3.easeCubicOut)
+          .attr("width", (d) => xShare(d.share));
+        labels
+          .attr("x", (d) => xShare(d.share) + 6)
+          .attr("opacity", 0)
+          .transition()
+          .delay(rowDelay + 300)
+          .duration(500)
+          .attr("opacity", (d) => barOpacity(category, d.city));
+      } else {
+        bars.attr("width", (d) => xShare(d.share)).attr("opacity", (d) => barOpacity(category, d.city));
+        labels.attr("x", (d) => xShare(d.share) + 6).attr("opacity", (d) => barOpacity(category, d.city));
+      }
+
+      labels.text((d) => `${d.share.toFixed(1)}%`);
+    });
+
+    hasDrawnRef.current = true;
+  }, [categoryTrends, cityTotals, width, selectedCategory, selectedCity, toggleCategory, inView, prefersReducedMotion]);
 
   return (
     <div ref={containerRef} className="w-full">

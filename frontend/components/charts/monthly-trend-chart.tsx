@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
+import { useReducedMotion } from "framer-motion";
 import { useChartWidth } from "@/hooks/use-chart-width";
+import { useInViewOnce } from "@/hooks/use-in-view-once";
 import { CITY_ORDER } from "@/lib/map-config";
 import { resolveCssColor } from "@/lib/color-utils";
 import { useFilter } from "@/lib/filter-context";
@@ -17,6 +19,9 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
   const { ref: containerRef, width } = useChartWidth<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>(null);
   const { selectedCategory, selectedCity } = useFilter();
+  const prefersReducedMotion = useReducedMotion();
+  const inView = useInViewOnce(containerRef);
+  const hasDrawnRef = useRef(false);
 
   // The unfiltered `data` prop is fetched server-side once; when a category is
   // selected, refetch just that slice client-side (same pattern as the map's
@@ -43,7 +48,8 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
   }, [selectedCategory, categoryData, data]);
 
   useEffect(() => {
-    if (!svgRef.current || width === 0 || activeData.length === 0) return;
+    if (!svgRef.current || width === 0 || activeData.length === 0 || !inView) return;
+    const isFirstDraw = !hasDrawnRef.current;
 
     const innerWidth = width - MARGIN.left - MARGIN.right;
     const innerHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
@@ -110,13 +116,29 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
       const color = resolveCssColor(meta.accentVar);
       const dimmed = selectedCity !== null && selectedCity !== meta.id;
 
-      g.append("path")
+      const path = g
+        .append("path")
         .datum(cityData)
         .attr("fill", "none")
         .attr("stroke", color)
         .attr("stroke-width", selectedCity === meta.id ? 3.5 : 2.5)
         .attr("opacity", dimmed ? 0.2 : 1)
         .attr("d", line);
+
+      // Draw the line in on its first appearance in the viewport (a classic D3
+      // technique: the dash pattern equals the path's own length, offset by
+      // that same length so nothing shows, then animated back to 0) rather
+      // than snapping fully-drawn into existence.
+      if (isFirstDraw && !prefersReducedMotion) {
+        const totalLength = path.node()?.getTotalLength() ?? 0;
+        path
+          .attr("stroke-dasharray", `${totalLength} ${totalLength}`)
+          .attr("stroke-dashoffset", totalLength)
+          .transition()
+          .duration(1400)
+          .ease(d3.easeCubicOut)
+          .attr("stroke-dashoffset", 0);
+      }
     }
 
     // Hover: vertical guideline + a dot per city + a small tooltip box, all D3-managed
@@ -176,7 +198,9 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
         tooltipRect.attr("width", maxTooltipWidth + 16).attr("height", CITY_ORDER.length * 16 + 8);
         tooltipText.forEach((t) => t.attr("x", 8));
       });
-  }, [activeData, width, selectedCity]);
+
+    hasDrawnRef.current = true;
+  }, [activeData, width, selectedCity, inView, prefersReducedMotion]);
 
   return (
     <div ref={containerRef} className="w-full">

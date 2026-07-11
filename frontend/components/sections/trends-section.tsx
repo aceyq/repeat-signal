@@ -26,7 +26,7 @@ export function TrendsSection({
   return (
     <section className="mx-auto max-w-5xl px-6 py-32">
       <Reveal>
-        <p className="text-sm uppercase tracking-[0.3em] text-muted">Over time</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 04 &middot; The Data</p>
       </Reveal>
       <Reveal delay={0.1}>
         <h2 className="mt-4 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
