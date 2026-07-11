@@ -8,13 +8,15 @@ import { LimitsSection } from "@/components/sections/limits-section";
 import MapSection from "@/components/sections/map-section-lazy";
 import { TrendsSection } from "@/components/sections/trends-section";
 import { CaseStudiesSection } from "@/components/sections/case-studies-section";
+import { ExploreChapter } from "@/components/sections/explore-chapter";
 import { ContinueSection } from "@/components/sections/continue-section";
 
 export default async function Home() {
-  const [summary, monthlyTrends, categoryTrends] = await Promise.all([
+  const [summary, monthlyTrends, categoryTrends, categories] = await Promise.all([
     api.getSummary(),
     api.getMonthlyTrends(),
     api.getCategoryTrends(),
+    api.getCategories(),
   ]);
 
   return (
@@ -31,6 +33,7 @@ export default async function Home() {
         cityTotals={summary.cities}
       />
       <CaseStudiesSection />
+      <ExploreChapter categories={categories} />
       <ContinueSection />
     </FilterProvider>
   );
