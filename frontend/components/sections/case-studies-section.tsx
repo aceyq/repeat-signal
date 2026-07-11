@@ -6,7 +6,7 @@ export function CaseStudiesSection() {
   return (
     <section className="mx-auto max-w-5xl px-6 py-32">
       <Reveal>
-        <p className="text-sm uppercase tracking-[0.3em] text-muted">Case studies</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 05 &middot; The Stories</p>
       </Reveal>
       <Reveal delay={0.1}>
         <h2 className="mt-4 max-w-2xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
@@ -19,11 +19,11 @@ export function CaseStudiesSection() {
           neighborhood, a month. Nothing in that data can tell us about a specific person. But
           separately from it, journalists and the cities&apos; own review committees have already
           made parts of this pattern public, case by case and report by report. One per city,
-          below, each linked to its original public source.
+          below, each linked to its original public source. Click a card to read the full case.
         </p>
       </Reveal>
 
-      <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="mt-14 grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
         {CASE_STUDIES.map((caseStudy, i) => (
           <CaseStudyCard key={caseStudy.city} caseStudy={caseStudy} delay={0.1 * i} />
         ))}

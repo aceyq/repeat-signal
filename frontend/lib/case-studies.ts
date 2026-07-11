@@ -15,6 +15,18 @@ export interface CaseStudy {
   body: string;
   sourceLabel: string;
   sourceUrl: string;
+  /** How the source itself should be described, e.g. to distinguish a news
+   * investigation from a primary government report -- shown as a small
+   * badge, itself a real, sourced fact about the record, not a rating. */
+  recordType: string;
+  /** Neighborhood-level location, only added where the primary source states
+   * it at that granularity -- never more specific (no street/address), same
+   * privacy standard the project already applies to its own incident data. */
+  location?: string;
+  /** Real, dated milestones directly from the cited source -- omitted
+   * entirely (not filled with an inference) for cases where the source is an
+   * aggregate statistic rather than a single documented incident (NYC). */
+  timeline?: { date: string; label: string }[];
   /** Optional isotype-style visual for a specific, precise count mentioned in `body`
    * -- only added where the source gives an exact number (not a rounded estimate). */
   pictogram?: { total: number; highlighted: number; caption: string };
@@ -29,6 +41,18 @@ export const CASE_STUDIES: CaseStudy[] = [
     sourceLabel: "ProPublica, “Domestic Violence Fatalities in Illinois Are Still Not Getting Reviewed” (2025)",
     sourceUrl:
       "https://www.propublica.org/article/deaths-are-rising-but-illinois-domestic-violence-review-boards-have-yet-to-offer-solutions",
+    recordType: "Investigative journalism",
+    timeline: [
+      { date: "2021", label: "Illinois passes a law requiring counties to review domestic violence deaths." },
+      {
+        date: "~6 weeks before Nov. 2024",
+        label: "Constantin Beldie released on electronic monitoring; the hearing reportedly did not include evidence of his alleged prior abuse.",
+      },
+      { date: "November 2024", label: "Lacramioara Beldie found killed in an apparent murder-suicide." },
+      { date: "December 2024", label: "Tanisha Weeks granted an order of protection." },
+      { date: "January 2025", label: "Tanisha Weeks killed in an apparent murder-suicide." },
+      { date: "2025", label: "Reporting finds only 7 of 102 Illinois counties have established a review board — not including Cook County." },
+    ],
     pictogram: {
       total: 102,
       highlighted: 7,
@@ -42,6 +66,10 @@ export const CASE_STUDIES: CaseStudy[] = [
     body: "According to New York City's own Domestic Violence Fatality Review Committee, in its 2024 Annual Report, more than 60% of people killed by an intimate partner in the city had no prior contact with any municipal institution — police, courts, shelters, or city and state agencies — before their deaths. Read the other way, that leaves a real, substantial minority of cases — documented by the city's own review process — where contact with the system did happen, and it did not prevent what came next.",
     sourceLabel: "NYC Domestic Violence Fatality Review Committee, 2024 Annual Report",
     sourceUrl: "https://www.nyc.gov/site/ocdv/press-resources/fatality-review-committee.page",
+    recordType: "Government report",
+    // No timeline: this source is a citywide aggregate statistic, not a
+    // single documented incident with dated events -- forcing a timeline
+    // onto it would invent structure the source doesn't have.
   },
   {
     city: "sf",
@@ -51,5 +79,10 @@ export const CASE_STUDIES: CaseStudy[] = [
     sourceLabel: "San Francisco Domestic Violence Death Review Team (DVDRT) Pilot Report (2023)",
     sourceUrl:
       "https://www.sf.gov/sites/default/files/2023-06/2023%20San%20Francisco%20Domestic%20Violence%20Death%20Review%20Team%20(DVDRT)%20Pilot%20Report.pdf",
+    recordType: "Government report",
+    location: "SOMA, San Francisco",
+    // The full minute-by-minute timeline for this case lives in Chapter 2
+    // (components/sections/response-chapter.tsx) -- linked from the card
+    // rather than duplicated here.
   },
 ];
