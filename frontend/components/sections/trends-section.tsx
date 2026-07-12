@@ -1,6 +1,7 @@
 "use client";
 
 import { Reveal } from "@/components/ui/reveal";
+import { ChapterIntro } from "@/components/ui/chapter-intro";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { CityLegend } from "@/components/charts/city-legend";
 import MonthlyTrendChart from "@/components/charts/monthly-trend-chart-lazy";
@@ -47,14 +48,16 @@ export function TrendsSection({
 
   return (
     <section id="chapter-4" className="mx-auto max-w-5xl scroll-mt-24 px-6 py-32">
-      <Reveal>
-        <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 04 &middot; The Data</p>
-      </Reveal>
-      <Reveal delay={0.1}>
-        <h2 className="mt-4 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
-          The shape of two years
-        </h2>
-      </Reveal>
+      <ChapterIntro>
+        <Reveal>
+          <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 04 &middot; The Data</p>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <h2 className="mt-4 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
+            The shape of two years
+          </h2>
+        </Reveal>
+      </ChapterIntro>
       <Reveal delay={0.2}>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
           Monthly incident counts across the full window, one line per city. Watch for

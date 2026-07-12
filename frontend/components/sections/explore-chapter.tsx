@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/reveal";
+import { ChapterIntro } from "@/components/ui/chapter-intro";
 import { api } from "@/lib/api";
 import { CITY_ORDER } from "@/lib/map-config";
 import { resolveCssColor } from "@/lib/color-utils";
@@ -72,14 +73,16 @@ export function ExploreChapter({ categories }: { categories: CategoryStats[] }) 
 
   return (
     <section id="chapter-6" className="mx-auto max-w-3xl scroll-mt-24 px-6 py-32">
-      <Reveal>
-        <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 06 &middot; Explore</p>
-      </Reveal>
-      <Reveal delay={0.1}>
-        <h2 className="mt-4 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
-          Everything above followed a script. This doesn&apos;t.
-        </h2>
-      </Reveal>
+      <ChapterIntro>
+        <Reveal>
+          <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 06 &middot; Explore</p>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <h2 className="mt-4 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
+            Everything above followed a script. This doesn&apos;t.
+          </h2>
+        </Reveal>
+      </ChapterIntro>
       <Reveal delay={0.2}>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
           Pick a city and a category from the full taxonomy &mdash; not just the ones already

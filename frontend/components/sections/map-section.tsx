@@ -6,6 +6,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useTheme } from "next-themes";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Reveal } from "@/components/ui/reveal";
+import { ChapterIntro } from "@/components/ui/chapter-intro";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { CITY_ORDER, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from "@/lib/map-config";
 import { resolveCssColor, rgba } from "@/lib/color-utils";
@@ -255,14 +256,16 @@ export function MapSection() {
 
         <div className="pointer-events-none relative z-10 mx-auto w-full max-w-6xl px-6 pt-16">
           <div className="inline-block rounded-lg bg-background/80 px-4 py-3 backdrop-blur">
-            <Reveal>
-              <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 03 &middot; The City</p>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <h2 className="mt-2 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                {CITY_ORDER[activeIndex].label}
-              </h2>
-            </Reveal>
+            <ChapterIntro>
+              <Reveal>
+                <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 03 &middot; The City</p>
+              </Reveal>
+              <Reveal delay={0.1}>
+                <h2 className="mt-2 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
+                  {CITY_ORDER[activeIndex].label}
+                </h2>
+              </Reveal>
+            </ChapterIntro>
             <div className="relative mt-2 max-w-sm text-sm text-muted">
               <AnimatePresence mode="wait">
                 {introTop ? (

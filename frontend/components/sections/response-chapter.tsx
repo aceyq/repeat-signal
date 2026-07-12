@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Reveal } from "@/components/ui/reveal";
+import { ChapterIntro } from "@/components/ui/chapter-intro";
 
 type EventType = "call" | "dispatch" | "custody" | "outcome";
 
@@ -186,14 +187,16 @@ export function ResponseChapter() {
 
   return (
     <section id="chapter-2" className="mx-auto max-w-3xl scroll-mt-24 px-6 py-32">
-      <Reveal>
-        <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 02 &middot; The Response</p>
-      </Reveal>
-      <Reveal delay={0.1}>
-        <h2 className="mt-4 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
-          Every call got a response
-        </h2>
-      </Reveal>
+      <ChapterIntro>
+        <Reveal>
+          <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 02 &middot; The Response</p>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <h2 className="mt-4 max-w-xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
+            Every call got a response
+          </h2>
+        </Reveal>
+      </ChapterIntro>
       <Reveal delay={0.2}>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
           This is the same San Francisco case from the opening scene, minute by minute, drawn entirely

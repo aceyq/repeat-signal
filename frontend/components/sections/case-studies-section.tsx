@@ -1,18 +1,21 @@
 import { Reveal } from "@/components/ui/reveal";
+import { ChapterIntro } from "@/components/ui/chapter-intro";
 import { CaseStudyCard } from "@/components/cards/case-study-card";
 import { CASE_STUDIES } from "@/lib/case-studies";
 
 export function CaseStudiesSection() {
   return (
     <section id="chapter-5" className="mx-auto max-w-5xl scroll-mt-24 px-6 py-32">
-      <Reveal>
-        <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 05 &middot; The Stories</p>
-      </Reveal>
-      <Reveal delay={0.1}>
-        <h2 className="mt-4 max-w-2xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
-          What the data can&apos;t show, but the public record can
-        </h2>
-      </Reveal>
+      <ChapterIntro>
+        <Reveal>
+          <p className="text-sm uppercase tracking-[0.3em] text-muted">Chapter 05 &middot; The Stories</p>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <h2 className="mt-4 max-w-2xl font-display text-3xl font-medium tracking-tight sm:text-4xl">
+            What the data can&apos;t show, but the public record can
+          </h2>
+        </Reveal>
+      </ChapterIntro>
       <Reveal delay={0.2}>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
           Every incident in the charts above is a single anonymous row — a category, a
