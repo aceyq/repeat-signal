@@ -41,7 +41,17 @@ export const CALL_TRANSCRIPT: TranscriptLine[] = [
   { id: "l4", text: "Police visited three times. It didn't stop what happened next.", atSeconds: 5.6 },
 ];
 
-export function CallTranscript({ lines = CALL_TRANSCRIPT }: { lines?: TranscriptLine[] }) {
+export function CallTranscript({
+  lines = CALL_TRANSCRIPT,
+  onActiveLineChange,
+}: {
+  lines?: TranscriptLine[];
+  /** Fires whenever a new line becomes the most-recently-revealed one --
+   * lets a sibling component (the waveform, see call-chapter.tsx) react to
+   * which beat of the transcript is currently "being said" instead of
+   * animating on its own independent, contentless loop. */
+  onActiveLineChange?: (line: TranscriptLine | undefined) => void;
+}) {
   const prefersReducedMotion = useReducedMotion();
   const [visibleCount, setVisibleCount] = useState(prefersReducedMotion ? lines.length : 0);
 
@@ -52,6 +62,10 @@ export function CallTranscript({ lines = CALL_TRANSCRIPT }: { lines?: Transcript
     );
     return () => timers.forEach(clearTimeout);
   }, [lines, prefersReducedMotion]);
+
+  useEffect(() => {
+    onActiveLineChange?.(visibleCount > 0 ? lines[visibleCount - 1] : undefined);
+  }, [visibleCount, lines, onActiveLineChange]);
 
   const allVisible = visibleCount >= lines.length;
 

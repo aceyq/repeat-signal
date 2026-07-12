@@ -20,13 +20,29 @@ function mulberry32(seed: number) {
   };
 }
 
+export type WaveformIntensity = "idle" | "speaking" | "quote";
+
+/** Amplitude/speed multipliers keyed to what the transcript above is doing --
+ * this is what makes the waveform react to the dialogue instead of just
+ * looping obliviously in the background. "quote" (the one moment this
+ * project has an actual verbatim recorded excerpt, see call-transcript.tsx)
+ * gets the most pronounced motion; "idle" (before any line has appeared)
+ * stays calm. Still no audio and no invented dialogue -- only the existing
+ * decorative motif's own intensity now corresponds to real content beats. */
+const INTENSITY: Record<WaveformIntensity, { amp: number; speed: number }> = {
+  idle: { amp: 0.45, speed: 1.5 },
+  speaking: { amp: 1, speed: 1 },
+  quote: { amp: 1.3, speed: 0.7 },
+};
+
 /** A live waveform, styled to read as "someone speaking into a headset" rather
  * than a uniform equalizer: each bar gets its own amplitude envelope (a few
  * random peaks/troughs, including the occasional near-silent dip for a
  * speech-like cadence) and its own loop duration, so the whole row never
  * settles into an obviously repeating, mechanical pattern. */
-export function CallWaveform({ seed = 7 }: { seed?: number }) {
+export function CallWaveform({ seed = 7, intensity = "idle" }: { seed?: number; intensity?: WaveformIntensity }) {
   const prefersReducedMotion = useReducedMotion();
+  const { amp, speed } = INTENSITY[intensity];
 
   const bars = useMemo(() => {
     const rand = mulberry32(seed);
@@ -56,12 +72,18 @@ export function CallWaveform({ seed = 7 }: { seed?: number }) {
           animate={
             prefersReducedMotion
               ? { scaleY: 0.45 }
-              : { scaleY: [BASE_HEIGHT / MAX_HEIGHT, ...bar.envelope, BASE_HEIGHT / MAX_HEIGHT] }
+              : {
+                  scaleY: [
+                    BASE_HEIGHT / MAX_HEIGHT,
+                    ...bar.envelope.map((v) => Math.min(1, v * amp)),
+                    BASE_HEIGHT / MAX_HEIGHT,
+                  ],
+                }
           }
           transition={
             prefersReducedMotion
               ? { duration: 0.01 }
-              : { duration: bar.duration, delay: bar.delay, repeat: Infinity, ease: "easeInOut" }
+              : { duration: bar.duration * speed, delay: bar.delay, repeat: Infinity, ease: "easeInOut" }
           }
         />
       ))}

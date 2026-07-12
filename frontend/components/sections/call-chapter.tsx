@@ -5,7 +5,7 @@ import { motion, useReducedMotion, useScroll, useMotionValue, useMotionValueEven
 import { DispatchBadge } from "@/components/dispatch/dispatch-badge";
 import { CallWaveform } from "@/components/dispatch/call-waveform";
 import { CallTimer } from "@/components/dispatch/call-timer";
-import { CallTranscript } from "@/components/dispatch/call-transcript";
+import { CallTranscript, type TranscriptLine } from "@/components/dispatch/call-transcript";
 import { SceneAtmosphere } from "@/components/ui/scene-atmosphere";
 import { ScrollCue } from "@/components/ui/scroll-cue";
 
@@ -82,6 +82,8 @@ export function CallChapter() {
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const [blackoutLifted, setBlackoutLifted] = useState(!!prefersReducedMotion);
+  const [activeLine, setActiveLine] = useState<TranscriptLine | undefined>(undefined);
+  const waveformIntensity = !activeLine ? "idle" : activeLine.quote ? "quote" : "speaking";
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -145,7 +147,7 @@ export function CallChapter() {
             animate={{ opacity: 1 }}
             transition={{ duration: prefersReducedMotion ? 0.01 : 0.8, delay: prefersReducedMotion ? 0 : WAVEFORM_DELAY }}
           >
-            <CallWaveform />
+            <CallWaveform intensity={waveformIntensity} />
           </motion.div>
           <motion.div
             initial={{ opacity: 0 }}
@@ -155,7 +157,7 @@ export function CallChapter() {
             <CallTimer className="text-sm" />
           </motion.div>
           <div className="mt-2 w-full max-w-md">
-            <CallTranscript />
+            <CallTranscript onActiveLineChange={setActiveLine} />
           </div>
         </motion.div>
 
