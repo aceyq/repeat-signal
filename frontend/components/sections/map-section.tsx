@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useTheme } from "next-themes";
-import { useMotionValueEvent, useScroll } from "framer-motion";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Reveal } from "@/components/ui/reveal";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { CITY_ORDER, MAP_STYLE_DARK, MAP_STYLE_LIGHT } from "@/lib/map-config";
@@ -67,6 +67,10 @@ function renderCity(
           // choropleth read as "incidents fading in" instead of a hard cut.
           "fill-color-transition": { duration: 700 },
           "fill-outline-color-transition": { duration: 700 },
+          // Also used for the one-time "single neighborhood, then the whole
+          // city" intro reveal below -- transitioning opacity the same way
+          // color already does.
+          "fill-opacity-transition": { duration: 900 },
         },
       },
       firstLabelLayerId,
@@ -118,11 +122,17 @@ export function MapSection() {
   const activeCacheKeyRef = useRef<string>(cacheKeyFor(CITY_ORDER[0].id, null));
   const lastFlownCityRef = useRef<City | null>(null);
   const currentStyleUrlRef = useRef<string | null>(null);
+  const introRevealDoneRef = useRef(false);
 
   const { resolvedTheme } = useTheme();
   const { selectedCategory, toggleCategory } = useFilter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [mapReady, setMapReady] = useState(false);
+  // Set only during the very first paint of the very first city: names the
+  // single most-reported neighborhood so the map can start on it alone
+  // before broadening into the full choropleth (see the effect below). Null
+  // once that one-time reveal has finished or was skipped (reduced motion).
+  const [introTop, setIntroTop] = useState<{ name: string; count: number } | null>(null);
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
   useMotionValueEvent(scrollYProgress, "change", (progress) => {
@@ -186,21 +196,50 @@ export function MapSection() {
     const city = CITY_ORDER[activeIndex].id;
     activeCityRef.current = city;
     const key = cacheKeyFor(city, selectedCategory);
+    const isVeryFirstPaint = !introRevealDoneRef.current && lastFlownCityRef.current === null;
 
     let cancelled = false;
+    let revealTimer: ReturnType<typeof setTimeout> | undefined;
     (async () => {
       if (!cache.current[key]) {
         cache.current[key] = await fetchCityGeoJson(city, selectedCategory);
       }
       if (cancelled || !popupRef.current) return;
+      const geojson = cache.current[key];
       const skipFlyTo = lastFlownCityRef.current === city;
-      renderCity(map, popupRef.current, city, cache.current[key], skipFlyTo);
+      renderCity(map, popupRef.current, city, geojson, skipFlyTo);
       lastFlownCityRef.current = city;
       activeCacheKeyRef.current = key;
+
+      // One-time entrance, the first time this chapter's map ever paints:
+      // isolate the single most-reported neighborhood before broadening into
+      // the full choropleth -- "one neighborhood" before "the whole city,"
+      // using a real count from the actual data rather than a fabricated
+      // "here's one incident" pin (this dataset has no exact address to
+      // point to responsibly).
+      if (isVeryFirstPaint) {
+        introRevealDoneRef.current = true;
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const top = geojson.features.reduce((a, b) =>
+          (a.properties?.incident_count ?? 0) >= (b.properties?.incident_count ?? 0) ? a : b,
+        );
+        const topId = top?.properties?.id as string | number | undefined;
+        const topName = top?.properties?.name as string | undefined;
+        const topCount = top?.properties?.incident_count as number | undefined;
+        if (topId !== undefined && topName && topCount !== undefined && !prefersReducedMotion) {
+          setIntroTop({ name: topName, count: topCount });
+          map.setPaintProperty(FILL_LAYER_ID, "fill-opacity", ["case", ["==", ["get", "id"], topId], 1, 0.04]);
+          revealTimer = setTimeout(() => {
+            map.setPaintProperty(FILL_LAYER_ID, "fill-opacity", 1);
+            setIntroTop(null);
+          }, 2200);
+        }
+      }
     })();
 
     return () => {
       cancelled = true;
+      if (revealTimer) clearTimeout(revealTimer);
     };
   }, [activeIndex, mapReady, selectedCategory]);
 
@@ -224,11 +263,32 @@ export function MapSection() {
                 {CITY_ORDER[activeIndex].label}
               </h2>
             </Reveal>
-            <Reveal delay={0.15}>
-              <p className="mt-2 max-w-sm text-sm text-muted">
-                Every neighborhood, shaded by how often it appears in two years of reports.
-              </p>
-            </Reveal>
+            <div className="relative mt-2 max-w-sm text-sm text-muted">
+              <AnimatePresence mode="wait">
+                {introTop ? (
+                  <motion.p
+                    key="intro"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    One neighborhood, {introTop.name}, carried {introTop.count.toLocaleString()} reports &mdash; more
+                    than anywhere else here in two years.
+                  </motion.p>
+                ) : (
+                  <motion.p
+                    key="full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    Every neighborhood, shaded the same way, by how often it appears in two years of reports.
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
             {selectedCategory && (
               <div className="pointer-events-auto mt-3">
                 <FilterChip
