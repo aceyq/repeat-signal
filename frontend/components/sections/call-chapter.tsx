@@ -71,7 +71,7 @@ function StatementLayer({
   return (
     <motion.p
       style={{ opacity }}
-      className="absolute inset-x-6 max-w-3xl text-balance text-center font-display text-3xl font-medium leading-tight tracking-tight sm:text-5xl"
+      className="absolute inset-x-6 lg:left-56 mx-auto max-w-3xl text-balance text-center font-display text-3xl font-medium leading-tight tracking-tight sm:text-5xl"
     >
       {text}
     </motion.p>
