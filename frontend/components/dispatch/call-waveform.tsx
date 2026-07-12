@@ -20,7 +20,7 @@ function mulberry32(seed: number) {
   };
 }
 
-export type WaveformIntensity = "idle" | "speaking" | "quote";
+export type WaveformIntensity = "idle" | "speaking" | "quote" | "flatline";
 
 /** Amplitude/speed multipliers keyed to what the transcript above is doing --
  * this is what makes the waveform react to the dialogue instead of just
@@ -28,8 +28,12 @@ export type WaveformIntensity = "idle" | "speaking" | "quote";
  * project has an actual verbatim recorded excerpt, see call-transcript.tsx)
  * gets the most pronounced motion; "idle" (before any line has appeared)
  * stays calm. Still no audio and no invented dialogue -- only the existing
- * decorative motif's own intensity now corresponds to real content beats. */
-const INTENSITY: Record<WaveformIntensity, { amp: number; speed: number }> = {
+ * decorative motif's own intensity now corresponds to real content beats.
+ * "flatline" (continue-section.tsx, once the closing beat's call "ends") is
+ * handled separately below -- a true still line, not just a low-amplitude
+ * wobble, so the transition from "idle" reads as the signal actually
+ * stopping rather than merely getting quieter. */
+const INTENSITY: Record<Exclude<WaveformIntensity, "flatline">, { amp: number; speed: number }> = {
   idle: { amp: 0.45, speed: 1.5 },
   speaking: { amp: 1, speed: 1 },
   quote: { amp: 1.3, speed: 0.7 },
@@ -42,7 +46,8 @@ const INTENSITY: Record<WaveformIntensity, { amp: number; speed: number }> = {
  * settles into an obviously repeating, mechanical pattern. */
 export function CallWaveform({ seed = 7, intensity = "idle" }: { seed?: number; intensity?: WaveformIntensity }) {
   const prefersReducedMotion = useReducedMotion();
-  const { amp, speed } = INTENSITY[intensity];
+  const isFlatline = intensity === "flatline";
+  const { amp, speed } = isFlatline ? { amp: 0, speed: 1 } : INTENSITY[intensity];
 
   const bars = useMemo(() => {
     const rand = mulberry32(seed);
@@ -71,19 +76,23 @@ export function CallWaveform({ seed = 7, intensity = "idle" }: { seed?: number; 
           initial={{ scaleY: BASE_HEIGHT / MAX_HEIGHT }}
           animate={
             prefersReducedMotion
-              ? { scaleY: 0.45 }
-              : {
-                  scaleY: [
-                    BASE_HEIGHT / MAX_HEIGHT,
-                    ...bar.envelope.map((v) => Math.min(1, v * amp)),
-                    BASE_HEIGHT / MAX_HEIGHT,
-                  ],
-                }
+              ? { scaleY: isFlatline ? BASE_HEIGHT / MAX_HEIGHT : 0.45 }
+              : isFlatline
+                ? { scaleY: BASE_HEIGHT / MAX_HEIGHT }
+                : {
+                    scaleY: [
+                      BASE_HEIGHT / MAX_HEIGHT,
+                      ...bar.envelope.map((v) => Math.min(1, v * amp)),
+                      BASE_HEIGHT / MAX_HEIGHT,
+                    ],
+                  }
           }
           transition={
             prefersReducedMotion
               ? { duration: 0.01 }
-              : { duration: bar.duration * speed, delay: bar.delay, repeat: Infinity, ease: "easeInOut" }
+              : isFlatline
+                ? { duration: 0.8, ease: "easeOut" }
+                : { duration: bar.duration * speed, delay: bar.delay, repeat: Infinity, ease: "easeInOut" }
           }
         />
       ))}
