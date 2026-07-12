@@ -23,6 +23,28 @@ export function TrendsSection({
   const cityLabel = selectedCity ? CITY_ORDER.find((c) => c.id === selectedCity)?.label : null;
   const hasActiveFilter = selectedCategory || selectedCity;
 
+  // Real findings, stated in words, computed from the same props the charts
+  // themselves draw from -- so the reader meets each one as a sentence before
+  // meeting it again as a shape (see charts' `entranceDelay`, below).
+  const grandTotal = cityTotals.reduce((sum, c) => sum + c.incident_count, 0);
+  const topVolumeCity =
+    cityTotals.length > 0
+      ? cityTotals.reduce((a, b) => (a.incident_count >= b.incident_count ? a : b))
+      : null;
+  const topVolumeCityLabel = topVolumeCity
+    ? (CITY_ORDER.find((c) => c.id === topVolumeCity.city)?.label ?? topVolumeCity.city)
+    : null;
+  const topVolumeShare =
+    topVolumeCity && grandTotal > 0 ? Math.round((topVolumeCity.incident_count / grandTotal) * 100) : null;
+
+  const topCategoryByCity = CITY_ORDER.map((meta) => {
+    const rows = categoryTrends.filter((r) => r.city === meta.id);
+    const top = rows.length > 0 ? rows.reduce((a, b) => (a.incident_count >= b.incident_count ? a : b)) : null;
+    return { cityLabel: meta.label, category: top ? formatCategoryLabel(top.category) : null };
+  }).filter((row): row is { cityLabel: string; category: string } => row.category !== null);
+  const allSameTopCategory =
+    topCategoryByCity.length > 1 && topCategoryByCity.every((row) => row.category === topCategoryByCity[0].category);
+
   return (
     <section id="chapter-4" className="mx-auto max-w-5xl scroll-mt-24 px-6 py-32">
       <Reveal>
@@ -56,10 +78,18 @@ export function TrendsSection({
         </Reveal>
       )}
 
-      <Reveal delay={0.3} className="mt-10">
+      {topVolumeCityLabel && topVolumeShare !== null && (
+        <Reveal delay={0.3} className="mt-10 max-w-2xl">
+          <p className="font-display text-2xl font-medium leading-snug text-foreground sm:text-3xl">
+            {topVolumeCityLabel} alone accounts for {topVolumeShare}% of every incident recorded here.
+          </p>
+        </Reveal>
+      )}
+
+      <Reveal delay={0.35} className="mt-10">
         <CityLegend />
         <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-          <MonthlyTrendChart data={monthlyTrends} />
+          <MonthlyTrendChart data={monthlyTrends} entranceDelay={700} />
         </div>
       </Reveal>
 
@@ -80,10 +110,29 @@ export function TrendsSection({
           </p>
         </Reveal>
 
-        <Reveal delay={0.3} className="mt-10">
+        {topCategoryByCity.length > 0 && (
+          <Reveal delay={0.3} className="mt-10 max-w-2xl">
+            <p className="font-display text-2xl font-medium leading-snug text-foreground sm:text-3xl">
+              {allSameTopCategory ? (
+                <>Every city&apos;s most-reported category is the same: {topCategoryByCity[0].category}.</>
+              ) : (
+                topCategoryByCity.map((row, i) => (
+                  <span key={row.cityLabel}>
+                    {i > 0 && " "}
+                    {i === 0
+                      ? `${row.cityLabel}'s most common category is ${row.category}.`
+                      : `${row.cityLabel}'s is ${row.category}.`}
+                  </span>
+                ))
+              )}
+            </p>
+          </Reveal>
+        )}
+
+        <Reveal delay={0.35} className="mt-10">
           <CityLegend />
           <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-            <CategoryComparisonChart categoryTrends={categoryTrends} cityTotals={cityTotals} />
+            <CategoryComparisonChart categoryTrends={categoryTrends} cityTotals={cityTotals} entranceDelay={700} />
           </div>
         </Reveal>
       </div>

@@ -15,7 +15,16 @@ const MARGIN = { top: 16, right: 16, bottom: 28, left: 48 };
 const HEIGHT = 360;
 const EMPTY: MonthlyTrend[] = [];
 
-export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
+export function MonthlyTrendChart({
+  data,
+  entranceDelay = 0,
+}: {
+  data: MonthlyTrend[];
+  /** Milliseconds to hold before the line starts drawing in, on first appearance
+   * only -- lets a narrative sentence above the chart land first, so the reader
+   * meets the finding in words before seeing it as a shape (see trends-section.tsx). */
+  entranceDelay?: number;
+}) {
   const { ref: containerRef, width } = useChartWidth<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>(null);
   const { selectedCategory, selectedCity } = useFilter();
@@ -135,6 +144,7 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
           .attr("stroke-dasharray", `${totalLength} ${totalLength}`)
           .attr("stroke-dashoffset", totalLength)
           .transition()
+          .delay(entranceDelay)
           .duration(1400)
           .ease(d3.easeCubicOut)
           .attr("stroke-dashoffset", 0);
@@ -200,7 +210,7 @@ export function MonthlyTrendChart({ data }: { data: MonthlyTrend[] }) {
       });
 
     hasDrawnRef.current = true;
-  }, [activeData, width, selectedCity, inView, prefersReducedMotion]);
+  }, [activeData, width, selectedCity, inView, prefersReducedMotion, entranceDelay]);
 
   return (
     <div ref={containerRef} className="w-full">

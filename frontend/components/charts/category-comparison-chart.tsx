@@ -63,9 +63,14 @@ function wrapLabel(selection: d3.Selection<SVGTextElement, string, SVGGElement, 
 export function CategoryComparisonChart({
   categoryTrends,
   cityTotals,
+  entranceDelay = 0,
 }: {
   categoryTrends: CategoryTrend[];
   cityTotals: CityStats[];
+  /** Milliseconds to hold before the first row starts growing in, on first
+   * appearance only -- lets a narrative sentence above the chart land first
+   * (see trends-section.tsx). */
+  entranceDelay?: number;
 }) {
   const { ref: containerRef, width } = useChartWidth<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>(null);
@@ -112,6 +117,7 @@ export function CategoryComparisonChart({
     const mutedColor = resolveCssColor("--muted");
     const foregroundColor = resolveCssColor("--foreground");
     const borderColor = resolveCssColor("--border");
+    const surfaceColor = resolveCssColor("--surface");
 
     const yCategory = d3.scaleBand().domain(topCategories).range([0, innerHeight]).paddingInner(0.35);
     const yCity = d3
@@ -161,6 +167,14 @@ export function CategoryComparisonChart({
       .attr("y2", innerHeight)
       .attr("stroke", borderColor);
 
+    // Hover tooltip: the bar and its inline "23.2%" label already show the share,
+    // hovering a bar additionally reveals the real incident count behind that
+    // percentage -- context on demand, not a permanent addition to the chart.
+    const tooltip = svg.append("g").style("display", "none").style("pointer-events", "none");
+    const tooltipRect = tooltip.append("rect").attr("fill", surfaceColor).attr("stroke", borderColor).attr("rx", 6);
+    const tooltipTitle = tooltip.append("text").attr("font-size", 12).attr("font-weight", 600).attr("x", 8).attr("y", 17).attr("fill", foregroundColor);
+    const tooltipDetail = tooltip.append("text").attr("font-size", 11).attr("x", 8).attr("y", 33).attr("fill", mutedColor);
+
     topCategories.forEach((category, categoryIndex) => {
       const rows = byCategory.get(category) ?? [];
       const rowG = g
@@ -190,8 +204,23 @@ export function CategoryComparisonChart({
         .attr("height", yCity.bandwidth())
         .attr("x", 0)
         .attr("fill", (d) => resolveCssColor(CITY_ORDER.find((c) => c.id === d.city)!.accentVar))
-        .attr("rx", 3);
-      bars.append("title").text((d) => `${d.city}: ${d.share.toFixed(1)}% of that city's incidents`);
+        .attr("rx", 3)
+        .on("mouseenter", () => tooltip.style("display", null))
+        .on("mouseleave", () => tooltip.style("display", "none"))
+        .on("mousemove", function (event, d) {
+          const cityMeta = CITY_ORDER.find((c) => c.id === d.city)!;
+          tooltipTitle.text(`${cityMeta.label} · ${formatCategoryLabel(category)}`);
+          tooltipDetail.text(`${d.share.toFixed(1)}% of incidents — ${d.incident_count.toLocaleString()} reports`);
+          const boxWidth =
+            Math.max(
+              tooltipTitle.node()?.getComputedTextLength() ?? 0,
+              tooltipDetail.node()?.getComputedTextLength() ?? 0,
+            ) + 16;
+          tooltipRect.attr("width", boxWidth).attr("height", 42);
+          const [mx, my] = d3.pointer(event, svg.node());
+          const tooltipX = mx + 14 + boxWidth > width ? mx - boxWidth - 14 : mx + 14;
+          tooltip.attr("transform", `translate(${tooltipX}, ${Math.max(0, my - 48)})`);
+        });
 
       const labels = rowG
         .selectAll("text.value")
@@ -207,7 +236,7 @@ export function CategoryComparisonChart({
       // row by row, on the chart's first appearance in the viewport -- never on
       // a later redraw caused by a filter change, which should feel instant.
       if (isFirstDraw && !prefersReducedMotion) {
-        const rowDelay = Math.min(categoryIndex * 90, 450);
+        const rowDelay = entranceDelay + Math.min(categoryIndex * 90, 450);
         bars
           .attr("width", 0)
           .attr("opacity", (d) => barOpacity(category, d.city))
@@ -232,7 +261,17 @@ export function CategoryComparisonChart({
     });
 
     hasDrawnRef.current = true;
-  }, [categoryTrends, cityTotals, width, selectedCategory, selectedCity, toggleCategory, inView, prefersReducedMotion]);
+  }, [
+    categoryTrends,
+    cityTotals,
+    width,
+    selectedCategory,
+    selectedCity,
+    toggleCategory,
+    inView,
+    prefersReducedMotion,
+    entranceDelay,
+  ]);
 
   return (
     <div ref={containerRef} className="w-full">
