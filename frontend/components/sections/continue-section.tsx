@@ -13,12 +13,11 @@ import { useInViewOnce } from "@/hooks/use-in-view-once";
 // on the site meant to feel unhurried rather than urgent.
 const ENDING_AT = 2200;
 const CLOSING_LINES = [
-  { id: "c1", text: "The call ends.", at: 3000 },
-  { id: "c2", text: "The timer stops. The line goes quiet.", at: 4400 },
-  { id: "c3", text: "Somewhere after that, it became a timestamp. A coordinate. A case number.", at: 6000 },
-  { id: "c4", text: "It was never only that.", at: 7800 },
-  { id: "c5", text: "Neither is any of the others.", at: 9400 },
+  { id: "c1", text: "For the dispatcher, the call is over.", at: 3200 },
+  { id: "c2", text: "For the people involved,", at: 5000 },
+  { id: "c3", text: "it rarely is.", at: 6100 },
 ];
+const BLACKOUT_AT = 8300;
 
 export function ContinueSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -26,6 +25,7 @@ export function ContinueSection() {
   const inView = useInViewOnce(containerRef);
   const [ended, setEnded] = useState(!!prefersReducedMotion);
   const [visibleCount, setVisibleCount] = useState(prefersReducedMotion ? CLOSING_LINES.length : 0);
+  const [blackout, setBlackout] = useState(false);
 
   // A plain timed sequence once this section enters view -- not scroll-linked,
   // the same reasoning as every other post-Chapter-1 animation on this site.
@@ -35,9 +35,11 @@ export function ContinueSection() {
     const lineTimers = CLOSING_LINES.map((line, i) =>
       setTimeout(() => setVisibleCount((c) => Math.max(c, i + 1)), line.at),
     );
+    const blackoutTimer = setTimeout(() => setBlackout(true), BLACKOUT_AT);
     return () => {
       clearTimeout(endTimer);
       lineTimers.forEach(clearTimeout);
+      clearTimeout(blackoutTimer);
     };
   }, [inView, prefersReducedMotion]);
 
@@ -48,25 +50,39 @@ export function ContinueSection() {
     >
       {/* The exact same dispatch console from Chapter 1's opening scene, reused
           rather than reinvented -- the site's own visual grammar for "a call is
-          happening," now shown at the moment it stops. */}
-      <div className="flex flex-col items-center gap-6">
-        <DispatchBadge label={ended ? "911 · Call ended" : "911 · Call in progress"} pulsing={!ended} />
-        <CallWaveform intensity={ended ? "flatline" : "idle"} />
-        <CallTimer running={!ended} className="text-sm" />
-      </div>
+          happening," now shown at the moment it stops. Wrapped with the opening
+          scene's own blackout technique in reverse: call-chapter.tsx fades a
+          black overlay *out* to open the site; this fades one back *in* to
+          close it, on the same console, so the whole site reads as one call
+          from open to close. */}
+      <div className="relative w-full">
+        <div className="flex flex-col items-center gap-6">
+          <DispatchBadge label={ended ? "911 · Call ended" : "911 · Call in progress"} pulsing={!ended} />
+          <CallWaveform intensity={ended ? "flatline" : "idle"} />
+          <CallTimer running={!ended} className="text-sm" />
+        </div>
 
-      <div className="mt-14 flex min-h-[14rem] flex-col items-center gap-4">
-        {CLOSING_LINES.slice(0, visibleCount).map((line) => (
-          <motion.p
-            key={line.id}
-            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0.01 : 0.9, ease: "easeOut" }}
-            className="max-w-xl text-lg leading-relaxed text-muted"
-          >
-            {line.text}
-          </motion.p>
-        ))}
+        <div className="mt-14 flex min-h-[9rem] flex-col items-center gap-4">
+          {CLOSING_LINES.slice(0, visibleCount).map((line) => (
+            <motion.p
+              key={line.id}
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0.01 : 0.9, ease: "easeOut" }}
+              className="max-w-xl text-lg leading-relaxed text-muted"
+            >
+              {line.text}
+            </motion.p>
+          ))}
+        </div>
+
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0 }}
+          animate={{ opacity: prefersReducedMotion ? 0 : blackout ? 1 : 0 }}
+          transition={{ duration: 2, ease: "easeIn" }}
+          className="pointer-events-none absolute -inset-x-6 -inset-y-10 bg-black"
+        />
       </div>
 
       <Reveal delay={0.2} className="mt-16 border-t border-border pt-8">
