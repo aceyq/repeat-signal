@@ -8,20 +8,32 @@ export function ContinueSection() {
       </Reveal>
       <Reveal delay={0.1}>
         <h2 className="mt-4 font-display text-3xl font-medium tracking-tight sm:text-4xl">
-          Not a verdict &mdash; a set of patterns, shown plainly
+          A number is not a person
         </h2>
       </Reveal>
       <Reveal delay={0.2}>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-          The map and charts above show where these incidents cluster and how they shift over
-          time and category. The case studies show that the pattern this project set out to
-          measure is already documented, city by city, in the public record. Neither one proves
-          the other &mdash; the data can&apos;t name a person, and a handful of cited cases can&apos;t
-          establish a citywide trend. Read together, with their limits attached, they&apos;re the
-          most honest picture this project can offer.
+          Every count on this page started as something specific &mdash; a phone ringing, an
+          address given out loud, a name typed into a form by whoever picked up. Two years of
+          that becomes a row: a category, a neighborhood, a month. That&apos;s what the public
+          record can honestly offer. It&apos;s still worth remembering, this far into the scroll,
+          that underneath each one is a night someone actually lived through.
         </p>
       </Reveal>
-      <Reveal delay={0.35}>
+      <Reveal delay={0.3}>
+        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
+          This project can&apos;t tell you why any single number moved, or name who was on the
+          other end of a specific call. It can&apos;t prove a policy is failing, and treating a
+          pattern as proof of one would be dishonest. What it can do is show you where a pattern
+          exists, clearly enough to be worth investigating further &mdash; which isn&apos;t the
+          same as answering the question. The cases earlier aren&apos;t evidence for the citywide
+          totals; they&apos;re a reminder that patterns like these are already being found, one
+          case at a time, by people willing to look closely. If something here raised a question
+          the charts couldn&apos;t settle, that&apos;s the honest edge of what this kind of data
+          can tell you &mdash; not a reason to stop asking it.
+        </p>
+      </Reveal>
+      <Reveal delay={0.4}>
         <p className="mt-10 text-sm text-muted">
           Built end to end &mdash; data pipeline, backend, and this page &mdash; and documented at
           every step in the project&apos;s{" "}
