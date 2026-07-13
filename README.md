@@ -2,7 +2,9 @@
 
 *A working title — an interactive data-storytelling project exploring patterns in public police report and 911 call-for-service data across multiple U.S. cities.*
 
-> **Status:** 🚧 Early development — Milestone 9 of 10 complete. The full narrative arc of the homepage is built and polished: hero, premise, live data stats, stated limits, an interactive map, D3 trend/comparison charts, and three cited case studies — accessibility-audited (contrast, reduced-motion, keyboard nav), responsive-checked, and performance-tuned, with a designed loading state for the eventual free-tier cold start. Remaining: public deployment.
+**Live:** [repeat-signal.vercel.app](https://repeat-signal.vercel.app/) — first load may take 30-50s if the backend has been idle (Render's free tier spins down after 15 minutes; the site's own loading state was designed for exactly this).
+
+> **Status:** ✅ Deployed — all 10 milestones complete. A full six-chapter documentary experience (cold open, animated timeline, interactive map, D3 trend/comparison charts, three cited case studies, and a free-form explorer), a cinematic emotional-storytelling pass (reactive waveform, scroll-glow timeline, single-neighborhood-first map reveal, narrative-led statistics, blur-into-focus chapter transitions, and a closing sequence that bookends the opening cold open), and a floating chapter navigator — accessibility-audited, responsive-checked, and performance-tuned. Live on Vercel (frontend), Render (backend), and Neon (database, free tier).
 
 ## What this is
 
